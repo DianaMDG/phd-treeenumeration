@@ -1,21 +1,13 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include"tree.h"
 
 #define N       11       /*N used in the neutral network NN(n,l) */
 #define SIZE    N+1     /*Number of bis used by the representation */
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
-
-/*typedef uint16_t ele_t;*/
-typedef char ele_t;
-
-/*Indexed array*/
-struct node {
-    int value;
-    struct node *children[N-1];
-};
 
 /*Triangular Adjacency matrix*/
 ele_t adjacency[(SIZE-1)*(SIZE)/2];
@@ -24,25 +16,8 @@ ele_t *lines[SIZE-1];
 /*ele_t adjacency[SIZE][SIZE];*/
 
 
-
 /******************************************************************/
-/******************   FUNCTION Declaration   **********************/
-/******************************************************************/
-
-/*Recursive function that generates the Prüfer sequences that will generate the trees*/
-void generate_seq(int spaces, int *generated);
-
-/*Function that generates trees from Prüfer sequences */
-void generate_tree(int *seq);
-
-/*Function that prints the adjacency matrix of a given tree*/
-void print_adj(ele_t **lines)
-
-/*Function that clears an adjacency matrix -> sets to zeros */
-void clear_adj(ele_t adjacency[]);
-
-/******************************************************************/
-/**************************   MAIN   ******************************/
+/************************   MAIN   ********************************/
 /******************************************************************/
 int main() {
 
@@ -62,7 +37,7 @@ int main() {
 
     /*Print adjacency matrix by lines*/
     /*print_adj(lines);*/
-    
+
     /*TEST: Change 2 lines of the matrix*/
     /*j=2;
     for (i=j+1; i < SIZE; i++) {
@@ -169,7 +144,7 @@ void generate_tree(int *seq){
 }
 
 /*Function that prints the adjacency matrix of a given tree*/
-void print_adj(ele_t **lines) {
+inline void print_adj(ele_t **lines) {
     /*NOTE: Print adjacency matrix using array of pointers lines, and alligned to right.*/ 
     /*WARNING: Size of stings is hard coded.*/
 
@@ -193,7 +168,7 @@ void print_adj(ele_t **lines) {
 }
 
 /*Function that clears an adjacency matrix -> sets to zeros */
-void clear_adj(ele_t adjacency[]) {
+inline void clear_adj(ele_t adjacency[]) {
     /*NOTE: */
     int i;
     for (i=0; i < (SIZE)*(SIZE-1)/2; i++) {
