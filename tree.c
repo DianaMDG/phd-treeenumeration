@@ -2,8 +2,8 @@
 #include<stdlib.h>
 #include<math.h>
 
-#define N       4       /*N utilizado pela Marisol*/
-#define SIZE    N+1     /*Número de bits utilizado pela representação*/
+#define N       4       /*N used in the neutral network NN(n,l) */
+#define SIZE    N+1     /*Number of bis used by the representation */
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -13,22 +13,22 @@ typedef char ele_t;
 
 /*Indexed array*/
 struct node {
-    int valor;
+    int value;
     struct node *children[N-1];
 };
 
-/*Matriz de adjacência triangular*/
-ele_t adjacencia[(SIZE-1)*(SIZE)/2];
-ele_t *linhas[SIZE-1];
+/*Triangular Adjacency matrix*/
+ele_t adjacency[(SIZE-1)*(SIZE)/2];
+ele_t *lines[SIZE-1];
 
-/*ele_t adjacencia[SIZE][SIZE];*/
+/*ele_t adjacency[SIZE][SIZE];*/
 
-/*Função que gera as árvores a partir das sequencias de Prüfer */
-void gerar_tree(int *seq){
+/*Function that generates trees from Prüfer sequences */
+void generate_tree(int *seq){
     int i, j;
     int degree[SIZE];
 
-    /*Primeiro passo da construção da árvore - construção array degree*/
+    /*1st step - degree array construction*/
     for (i = 0; i < SIZE; i++){
         degree[i] = 1;
     }
@@ -38,102 +38,112 @@ void gerar_tree(int *seq){
     }
     /*printf("%d\n", degree[SIZE-1]);*/
 
-    /*Definição das arestas do grafo e destruição do array degree*/
-    for (i = 0; i < SIZE-2 ; i++) { /* elementos da seq : 0 -> SIZE-2 */
-        for (j = 0; j < SIZE; j++) { /*elementos do degree*/
+    /*Graph edge definition and degree array destruction*/
+    for (i = 0; i < SIZE-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
+        for (j = 0; j < SIZE; j++) { /* degree elements*/
             if (degree[j] == 1) {
                 /*insert edge (seq[i], j) TODO*/
-                /*Caso adjacência*/
-                /**(linhas[(int)min(seq[i],j)] + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1))= 1; + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1)*/
-                linhas[seq[i]][j] = 1;
-                /*Caso Array*/
+                /*Adjacency Case*/
+                /**(lines[(int)min(seq[i],j)] + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1))= 1; + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1)*/
+                lines[seq[i]][j] = 1;
+                /*Array Case*/
                 degree[j] -= 1;
                 degree[seq[i]] -= 1;
                 break;
             }
         }
     }
-    /*Imprime a matriz de adjacencia*/
-    printf("matriz de adjacencia: %4d\n", SIZE*(SIZE-1)/2);
+    /*print adjacency matrix*/
+    printf("Adjacency matrix: %4d\n", SIZE*(SIZE-1)/2);
     for (i=0;i< (SIZE*(SIZE-1)/2); i++){
-        printf("%d ", adjacencia[i]);
+        printf("%d ", adjacency[i]);
     }
     printf("\n");
 }
 
-/*Função que imprime a matriz de adjacência de uma dada árvore*/
+/*Function that prints the adjacency matrix of a given tree*/
+void print_adj(ele_t adjacency[]) {
 
+}
 
-/*Função recursiva que gera as sequências de Prüfer que vão gerar as árvores*/
-void gerar_seq(int casas, int *gerado) {
-
+/*Recursive function that generates the Prüfer sequences that will generate the trees*/
+void generate_seq(int spaces, int *generated) {
+    /* spaces    - blank spaces in the sequence to fill up*/
+    /* generated - sequence generated so far */
+    /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
+    
     int i, j;
-    if (casas > 1)
+    if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            gerado[SIZE-2-casas] = i; /*i porque os valores são de 0 a n, e i vai de 0 a n */
-            gerar_seq (casas-1, gerado);
+            generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
+            generate_seq (spaces-1, generated);
         }
-    else
-    /*Está na última casa da sequência*/
-        for ( i = 0; i< SIZE ;i++){
-            gerado[SIZE-2-casas] = i; /*i+1 porque os valores são de 1 a n, e i vai de 0 a n-1*/
+    }
+    else {
+        /*It is in the last sequence space*/
+        for (i = 0; i< SIZE ;i++){
+            generated[SIZE-2-spaces] = i;
 
-            /*Imprime os valores das sequências*/
-            printf("Nova sequência: [");
-            for ( j = 0; j < SIZE-2; j++)
-                printf("%d %s", gerado[j], j< SIZE-3 ? ",\0":"]\n");
-            printf("Vai gerar nova árvore:\n");
-            /*Gerar árvore associada à sequência*/
-            gerar_tree(gerado);
+            /*Prints the present sequence values*/
+            printf("New sequence: [");
+            for ( j = 0; j < SIZE-2; j++) {
+                printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
+            }
+            printf("Will generate a new tree:\n");
+            /*Generate tree associated to the sequence generated*/
+            generate_tree(generated);
          }
+     }
 }
 /*MAIN*/
 int main() {
 
-    int gerado[SIZE-2];
+    int generated[SIZE-2];
     int i, j;
     int a = -1;
 
-    /*Gerar matriz de adjacência e acessos a ela*/
+    /*Generate adjacency matrix and respective lines pointer array*/
     for (i=0; i < SIZE-1; i++) {
-        linhas[i] = adjacencia + a;
+        lines[i] = adjacency + a;
         a += N - i - 1; /*a += SIZE - 2 - i;*/
     }
-    /*Atribuir valores aos elementos da matriz*/
+    /*TEST: Set matrix values*/
     for (i=0; i < (SIZE-1)*(SIZE)/2; i++) {
-        adjacencia[i] = i+1;
+        adjacency[i] = i+1;
     }
-    /*Imprimir a matriz de adjacência*/
-    printf("Imprimir matriz Adj: %d\n",  (SIZE-1)*(SIZE)/2);
+    /*Print adjacency matrix*/
+    printf("Print Adj matrix: %d\n",  (SIZE-1)*(SIZE)/2);
     for (i=0; i < (SIZE-1)*(SIZE)/2; i++) {
-        printf("%d, ",adjacencia[i]);
+        printf("%d, ",adjacency[i]);
     }
     printf("\n");
-    /*Imprimir a matriz de adjacência plas linhas*/
-    printf("Imprimir matriz Adj pelas linhas:\n");
+    /*Print adjacency matrix by lines*/
+    printf("Print adjacency matrix by lines:\n");
     char temp[128];
     for (i=0; i < SIZE-1; i++) {
         temp[0] = '\0';
         for (j = i+1; j < SIZE; j++) {
             /*printf("%d, ",linhas[i][j]);*/
-            sprintf(temp, "%s%2d, ", temp, linhas[i][j]);
+            sprintf(temp, "%s%2d, ", temp, lines[i][j]);
         }
-            
         printf("%16s\n", temp);
     }
-    /*mudar 2 linha da matriz*/
+    /*TEST: Change 2 lines of the matrix*/
     j=2;
-    for (i=j+1; i < SIZE; i++)
-        linhas[j][i] = 0;
-    /*Imprimir a matriz de adjacência plas linhas*/
-    printf("Imprimir matriz Adj pelas linhas:\n");
+    for (i=j+1; i < SIZE; i++) {
+        lines[j][i] = 0;
+    }
+    /*Print adjacency matrix by lines*/
+    printf("Print adjacency matrix by lines:\n");
     for (i=0; i < SIZE-1; i++) {
-        for (j = i+1; j < SIZE; j++)
-            printf("%d, ",linhas[i][j]);
+        for (j = i+1; j < SIZE; j++) {
+            printf("%d, ",lines[i][j]);
+        }
         printf("\n");
     }
-    /*Gerar sequências de Prüfer*/
-    /*gerar_seq(SIZE-2, gerado);*/
+
+    /*Generate Prüfer sequences*/
+    generate_seq(SIZE-2, generated);
 
     return 0;
 }
