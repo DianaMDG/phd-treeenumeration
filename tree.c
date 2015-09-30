@@ -39,7 +39,7 @@ void gerar_tree(int *seq){
     /*printf("%d\n", degree[SIZE-1]);*/
 
     /*Definição das arestas do grafo e destruição do array degree*/
-    for (i=0; i < SIZE-2 ; i++) { /* elementos da seq : 0 -> SIZE-2 */
+    for (i = 0; i < SIZE-2 ; i++) { /* elementos da seq : 0 -> SIZE-2 */
         for (j = 0; j < SIZE; j++) { /*elementos do degree*/
             if (degree[j] == 1) {
                 /*insert edge (seq[i], j) TODO*/
@@ -60,6 +60,9 @@ void gerar_tree(int *seq){
     }
     printf("\n");
 }
+
+/*Função que imprime a matriz de adjacência de uma dada árvore*/
+
 
 /*Função recursiva que gera as sequências de Prüfer que vão gerar as árvores*/
 void gerar_seq(int casas, int *gerado) {
@@ -88,16 +91,49 @@ void gerar_seq(int casas, int *gerado) {
 int main() {
 
     int gerado[SIZE-2];
-    int a=-1, i;
+    int i, j;
+    int a = -1;
 
     /*Gerar matriz de adjacência e acessos a ela*/
     for (i=0; i < SIZE-1; i++) {
         linhas[i] = adjacencia + a;
-        a+=N-i;
+        a += N - i - 1; /*a += SIZE - 2 - i;*/
     }
-
+    /*Atribuir valores aos elementos da matriz*/
+    for (i=0; i < (SIZE-1)*(SIZE)/2; i++) {
+        adjacencia[i] = i+1;
+    }
+    /*Imprimir a matriz de adjacência*/
+    printf("Imprimir matriz Adj: %d\n",  (SIZE-1)*(SIZE)/2);
+    for (i=0; i < (SIZE-1)*(SIZE)/2; i++) {
+        printf("%d, ",adjacencia[i]);
+    }
+    printf("\n");
+    /*Imprimir a matriz de adjacência plas linhas*/
+    printf("Imprimir matriz Adj pelas linhas:\n");
+    char temp[128];
+    for (i=0; i < SIZE-1; i++) {
+        temp[0] = '\0';
+        for (j = i+1; j < SIZE; j++) {
+            /*printf("%d, ",linhas[i][j]);*/
+            sprintf(temp, "%s%2d, ", temp, linhas[i][j]);
+        }
+            
+        printf("%16s\n", temp);
+    }
+    /*mudar 2 linha da matriz*/
+    j=2;
+    for (i=j+1; i < SIZE; i++)
+        linhas[j][i] = 0;
+    /*Imprimir a matriz de adjacência plas linhas*/
+    printf("Imprimir matriz Adj pelas linhas:\n");
+    for (i=0; i < SIZE-1; i++) {
+        for (j = i+1; j < SIZE; j++)
+            printf("%d, ",linhas[i][j]);
+        printf("\n");
+    }
     /*Gerar sequências de Prüfer*/
-    gerar_seq(SIZE-2, gerado);
+    /*gerar_seq(SIZE-2, gerado);*/
 
     return 0;
 }
