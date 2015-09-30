@@ -23,44 +23,6 @@ ele_t *lines[SIZE-1];
 
 /*ele_t adjacency[SIZE][SIZE];*/
 
-/*Function that generates trees from Prüfer sequences */
-void generate_tree(int *seq){
-    int i, j;
-    int degree[SIZE];
-
-    /*1st step - degree array construction*/
-    for (i = 0; i < SIZE; i++){
-        degree[i] = 1;
-    }
-    for (i = 0; i < SIZE-2; i++){
-        /*printf("check2\n");*/
-        degree[seq[i]] += 1;
-    }
-    /*printf("%d\n", degree[SIZE-1]);*/
-
-    /*Graph edge definition and degree array destruction*/
-    for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
-        for (j = 0; j < (SIZE); j++) { /* degree elements*/
-            if (degree[j] == 1) {
-                /*insert edge (seq[i], j) TODO*/
-                /*Adjacency Case*/
-                /**(lines[(int)min(seq[i],j)] + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1))= 1; + (int)((int)max(seq[i],j)-(int)min(seq[i],j)-1)*/
-                lines[seq[i]][j] = 1;
-                /*Array Case*/
-                degree[j] -= 1;
-                degree[seq[i]] -= 1;
-                break;
-            }
-        }
-    }
-    /*print adjacency matrix*/
-    printf("Adjacency matrix: %4d\n", (SIZE)*(SIZE-1)/2);
-    for (i=0;i< ((SIZE)*(SIZE-1)/2); i++){
-        printf("%d ", adjacency[i]);
-    }
-    printf("\n");
-}
-
 /*Function that prints the adjacency matrix of a given tree*/
 void print_adj(ele_t **lines) {
     /*NOTE: Print adjacency matrix using array of pointers lines, and alligned to right.*/ 
@@ -92,6 +54,53 @@ void clear_adj(ele_t adjacency[]) {
     for (i=0; i < (SIZE)*(SIZE-1)/2; i++) {
         adjacency[i] = 0;
     }
+}
+
+/*Function that generates trees from Prüfer sequences */
+void generate_tree(int *seq){
+    int i, j;
+    int degree[SIZE];
+
+    /*1st step - degree array construction*/
+    for (i = 0; i < SIZE; i++){
+        degree[i] = 1;
+    }
+    for (i = 0; i < SIZE-2; i++){
+        /*printf("check2\n");*/
+        degree[seq[i]] += 1;
+    }
+    /*printf("%d\n", degree[SIZE-1]);*/
+
+    /*Graph edge definition and degree array destruction*/
+    for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
+        for (j = 0; j < (SIZE); j++) { /* degree elements*/
+            if (degree[j] == 1) {
+                /*insert edge (seq[i], j)*/
+                /*Adjacency Case*/
+                lines[seq[i]][j] = 1;
+                /*Array Case TODO*/
+                degree[j] -= 1;
+                degree[seq[i]] -= 1;
+                break;
+            }
+        }
+    }
+    /*Finds the last two indexes with value 1*/
+    i = -1;
+    for (j = 0; j < (SIZE); j++) {
+        if (degree[j] == 1 && i < 0) {
+            i = j;
+            printf("i: %d\n", i);
+        }
+        else if (degree[j] == 1 && i >= 0) {
+            lines[i][j] = 1;
+            printf("j: %d\n", j);
+        }
+    }
+    /*print adjacency matrix*/
+    print_adj(lines);
+    /*Clear Adj matrix*/
+    clear_adj(adjacency);
 }
 
 /*Recursive function that generates the Prüfer sequences that will generate the trees*/
