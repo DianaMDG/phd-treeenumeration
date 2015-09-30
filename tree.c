@@ -2,9 +2,15 @@
 #include<stdlib.h>
 #include<math.h>
 #include"tree.h"
+/*#include"neutral_rep.h"*/
 
-#define N       11       /*N used in the neutral network NN(n,l) */
-#define SIZE    N+1     /*Number of bis used by the representation */
+#define N       10        /*N used in the neutral network NN(n,l) */
+#define SIZE    (N+1)     /*Number of bis used by the representation */
+
+#define TREE    1
+#define GRAPH   (1<<1)
+#define CANTREE (1<<2)
+
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -82,7 +88,7 @@ void generate_seq(int spaces, int *generated) {
         for (i = 0; i< (SIZE); i++) {
             generated[SIZE-2-spaces] = i;
 
-            /*Prints the present sequence values*/
+            /*Prints the current sequence values*/
             /*printf("New sequence: [");
             for ( j = 0; j < SIZE-2; j++) {
                 printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
@@ -117,7 +123,7 @@ void generate_tree(int *seq){
                 /*Adjacency Case*/
                 /*printf("seq[i], %d\t", seq[i]);*/
                 /*printf("j, %d\n", j);*/
-                lines[min(seq[i], j)][max(seq[i],j)] = 1;
+                lines[min(seq[i], j)][max(seq[i],j)] = TREE;
                 /*Array Case TODO*/
                 degree[j] -= 1;
                 degree[seq[i]] -= 1;
@@ -133,20 +139,23 @@ void generate_tree(int *seq){
             /*printf("i: %d\n", i);*/
         }
         else if (degree[j] == 1 && i >= 0) {
-            lines[i][j] = 1;
+            lines[i][j] = TREE;
             /*printf("j: %d\n", j);*/
         }
     }
     /*print adjacency matrix*/
-    /*print_adj(lines);*/
+    /*print_adj();*/
+    
+    /*Calculate the graph associated with it*/
+    /*generate_graph();*/
     /*Clear Adj matrix*/
-    clear_adj(adjacency);
+    clear_adj();
 }
 
 /*Function that prints the adjacency matrix of a given tree*/
-inline void print_adj(ele_t **lines) {
+ void print_adj() {
     /*NOTE: Print adjacency matrix using array of pointers lines, and alligned to right.*/ 
-    /*WARNING: Size of stings is hard coded.*/
+    /*WARNING: Size of strings is hard coded.*/
 
     int i, j;
     /*Print using adjacency array*/
@@ -168,7 +177,7 @@ inline void print_adj(ele_t **lines) {
 }
 
 /*Function that clears an adjacency matrix -> sets to zeros */
-inline void clear_adj(ele_t adjacency[]) {
+ void clear_adj() {
     /*NOTE: */
     int i;
     for (i=0; i < (SIZE)*(SIZE-1)/2; i++) {
