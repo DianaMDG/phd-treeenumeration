@@ -55,10 +55,10 @@ void make_syndromes(uint16_t n, uint16_t k, uint16_t g, uint16_t *s) {
     for (i = 0; i < (1 << 7); i++) {
         a[i] = 0;
     }
-    for (i = 0; i < n; i++) { /* para cada zero */
-    /*    for (j = 0; j < n; j++) { /* para cada mutação em torno de cada zero */
+    for (i = 0; i < n; i++) { */ /*para cada zero*/
+    /*    for (j = 0; j < n; j++) {*/ /* para cada mutação em torno de cada zero */
     /*        printf("teste %3o %3o", z[i] & (1<<j) ,decode(n, k, g, z, z[i] & (1<<j)));
-            a[decode(n, k, g, z, z[i] & 1<<j)] += 1; /* vê fenótipo */
+            a[decode(n, k, g, z, z[i] & 1<<j)] += 1; *//* vê fenótipo */
     /*    }
     }
     free(a);
@@ -66,11 +66,11 @@ void make_syndromes(uint16_t n, uint16_t k, uint16_t g, uint16_t *s) {
 }*/
 
 
-int main() {
+/*int main() {
     uint16_t i;
     uint16_t R1[] = {0, 1, 2, 8, 4, 64, 16, 32};
     uint16_t R2[] = {0, 1, 2, 4, 8, 16, 32, 64};
-    
+    */
     /*make_codewords(7, 4, h74_g, h74_codeword, R, 0);
     printf("Hamming (7,4) code\n");
     for(i = 0; i < (1 << 4); i++)
@@ -83,7 +83,7 @@ int main() {
         printf("%03o %03o\n", i, h74_codeword_1[i]);
     printf("\n");
     */
-    
+    /*
     make_syndromes(7, 4, h74_g, h74_syndrome);
     printf("Hamming (7,4) syndromes\n");
     for(i = 0; i < (1 << 7); i++)
@@ -93,7 +93,7 @@ int main() {
     
     for(i = 0; i < (1 << 7); i++)
         printf("%03o %03o %03o\n", i, decode(7, 4, h74_g, R1, i), decode(7, 4, h74_g, R2, i));
-    printf("\n");
+    printf("\n");*/
 /*    printf("decode de %03o = %03o\n", 0177, decode(7, 4, h74_g, R, 0177));*/
     
     /*printf("conectividade da rede = %03o\n", conectividade(7, 4, h74_g, R));*/
@@ -107,7 +107,7 @@ int main() {
     printf("Hamming (15,11) syndromes\n");
     for(i = 0; i < (1 << 15); i++)
         printf("%04x %04x\n", i, h1511_syndrome[i]);
-    */
+    
     return 0;
-}
+}*/
 

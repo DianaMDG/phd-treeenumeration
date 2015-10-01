@@ -20,11 +20,11 @@ void generate_seq(int spaces, int *generated);
 void generate_tree(int *seq);
 
 /*Function that prints the adjacency matrix of a given tree*/
- void print_adj();
+void print_adj();
 
 /*Function that clears an adjacency matrix -> sets to zeros */
- void clear_adj();
+void clear_adj();
 
-/*Function that generates the neutral network given by the tree*/
+/*Function that generates the neutral network graph from the tree*/
 void generate_graph();
 
