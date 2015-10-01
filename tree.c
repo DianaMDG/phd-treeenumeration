@@ -78,7 +78,8 @@ void generate_seq(int spaces, int *generated) {
     int i;
     /*int j;*/ /*Separated because j is unused when not printing*/
     if (spaces > 1) {
-        for( i = 0; i < SIZE; i++) {
+/*        for( i = 0; i < SIZE; i++) {*/
+        for( i = 1; i < SIZE; i++) {
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             break;
@@ -187,20 +188,25 @@ void generate_graph() {
                                                     printf(" %d%c", next_z[a], a < N ? ',' : '\n');
                                                 }
                            printf("lines[%d][%d]\n", next_z[k], i);
-            if (lines[next_z[k]][i] == 1) {
+            if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
                 count +=1;
                            printf("lines[%d][%d] = 1\n", next_z[k], i);
+                           printf("inicia procura\n");
+                           printf("\tZ[%d] = %d\n", next_z[k], Z[next_z[k]]);
                 for (j = 0; j < N; j++) { /* for each d = 1*/
+                
+                
                     /*creates the word and checks syndrome*/
-                    t_w = Z[next_z[k]] + (uint16_t)(1<<j);
+                    t_w = Z[next_z[k]] ^ (uint16_t)(1<<j);
+                    printf("\tword : %d\t", t_w);
                     t_s = syndrome(N, K, g_3, t_w);
+                    printf("\tsindrome : %d\n", t_s);
                     if (t_s == i) {
                         /*saves zero, records next_z, breaks inner cycle*/
                         Z[i] = t_w;
                         next_z[next] = i;
                         next +=1;
-                        printf("break! next = %d", next-1);
-                        printf("check\n");
+                        printf("found zero %d! added to queue = %d\n", i,next-1);
                             printf("Z\t: \t");
                             for (a = 0; a < SIZE; a++) {
                                 printf(" %d%c", Z[a], a < N ? ',' : '\n');
@@ -211,24 +217,31 @@ void generate_graph() {
             }
         }
         /*and columns*/
-        for (i = 1; i < next_z[k] ; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
+        for (i = 1; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
             printf("Buuuuuuu!!!!!\n");
             if (count == 8) {
                 printf("BREAK\n");
                 break;
             }
                                 printf("lines[%d][%d]\n", i, next_z[k]);
-            if (lines[i][next_z[k]] == 1) {
+            if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
+                count += 1;
                               printf("lines[%d][%d] = 1\n", i, next_z[k]);
                 for (j = 0; j < N; j++) { /* for each d = 1*/
                     /*creates the word and checks syndrome*/
-                    t_w = Z[next_z[k]] + (uint16_t)(1<<j);
+                    t_w = Z[next_z[k]] ^ (uint16_t)(1<<j);
                     t_s = syndrome(N, K, g_3, t_w);
                     if (t_s == i) {
                         /*saves zero, records next_z, breaks inner cycle*/
                         Z[i] = t_w;
                         next_z[next] = i;
                         next +=1;
+                        printf("BUU break! next = %d", next-1);
+                        printf("check\n");
+                            printf("Z\t: \t");
+                            for (a = 0; a < SIZE; a++) {
+                                printf(" %d%c", Z[a], a < N ? ',' : '\n');
+                            }
                         break;
                     }
                 }
