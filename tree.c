@@ -5,7 +5,7 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define N       8         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 #define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
 #define K       (N-3)     /*Number of information bits*/
 
@@ -41,22 +41,6 @@ int main() {
         lines[i] = adjacency + a;
         a += N - i - 1; /*a += SIZE - 2 - i;*/
     }
-    /*------------------TEST: Set matrix values*/
-    /*for (i=0; i < (SIZE-1)*(SIZE)/2; i++) {
-        adjacency[i] = i+1;
-    }*/
-
-    /*Print adjacency matrix by lines*/
-    /*print_adj(lines);*/
-
-    /*TEST: Change 2 lines of the matrix*/
-    /*j=2;
-    for (i=j+1; i < SIZE; i++) {
-        lines[j][i] = 0;
-    }*/
-    /*Print adjacency matrix by lines*/
-    /*print_adj(lines);*/
-    /*-------------------END OF TEST*/
 
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-2, generated);
@@ -95,6 +79,7 @@ void generate_seq(int spaces, int *generated) {
                 printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
             }*/
             /*printf("Will generate a new tree:\n");*/
+
             /*Generate tree associated to the sequence generated*/
             generate_tree(generated);
             /*break;*/
@@ -106,6 +91,7 @@ void generate_seq(int spaces, int *generated) {
 void generate_tree(int *seq){
     int i, j;
     int degree[SIZE];
+    int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
 
     /*1st step - degree array construction*/
     for (i = 0; i < SIZE; i++){
@@ -115,34 +101,39 @@ void generate_tree(int *seq){
         degree[seq[i]] += 1;
     }
 
+    /*check first node with degree equal to 1 */
+    for (i = 0; i < SIZE; i++){
+        if (degree[i]==1) {
+            x = i;
+            index = x;
+            break;
+        }
+    }
     /*Graph edge definition and degree array destruction*/
     for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
-        for (j = 0; j < (SIZE); j++) { /* degree elements*/
-            if (degree[j] == 1) {
-                /*insert edge (seq[i], j)*/
-                lines[min(seq[i], j)][max(seq[i],j)] = TREE; /*Adjacency Case*/
-                /*Array Case TODO*/
-                degree[j] -= 1;
-                degree[seq[i]] -= 1;
-                break;
+        y = seq[i];
+        lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
+        degree[y] -= 1;
+        if ((y < index) && (degree[y] == 1)) {
+            x = y;
+        }
+        else {
+            for (j = index + 1; j < SIZE; j++){
+                if (degree[j]==1) {
+                    index = x = j;
+                    break;
+                }
             }
         }
     }
-    /*Finds the last two indexes with value 1*/
-    i = -1;
-    for (j = 0; j < (SIZE); j++) {
-        if (degree[j] == 1 && i < 0) {
-            i = j;
-        }
-        else if (degree[j] == 1 && i >= 0) {
-            lines[i][j] = TREE;
-        }
-    }
+    y = SIZE-1;
+    lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
+    
     /*print adjacency matrix*/
     /*print_adj();*/
 
     /*Calculate the graph associated with it*/
-    generate_graph();
+    /*generate_graph();*/
     /*Clear Adj matrix*/
     clear_adj();
 }
