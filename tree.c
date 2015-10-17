@@ -5,7 +5,7 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       8         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define N       7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 #define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
 #define K       (N-3)     /*Number of information bits*/
 
@@ -61,6 +61,7 @@ void generate_seq(int spaces, int *generated) {
     
     int i;
     /*int j;*/ /*Separated because j is unused when not printing*/
+    
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
@@ -74,7 +75,7 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-2-spaces] = i;
 
             /*Prints the current sequence values*/
-            /*printf("New sequence: [");
+            /*printf("\nNew sequence: [");
             for ( j = 0; j < SIZE-2; j++) {
                 printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
             }*/
@@ -104,11 +105,11 @@ void generate_tree(int *seq){
     /*check first node with degree equal to 1 */
     for (i = 0; i < SIZE; i++){
         if (degree[i]==1) {
-            x = i;
-            index = x;
+            index = x = i;
             break;
         }
     }
+
     /*Graph edge definition and degree array destruction*/
     for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
         y = seq[i];
@@ -227,7 +228,7 @@ void print_adj() {
         for (j = i+1; j < (SIZE); j++) {
             sprintf(temp, "%s%2d%c ", temp, lines[i][j], j<(SIZE-1) ? ',' : ' ');
         }
-        printf("%30s\n", temp);
+        printf("%32s\n", temp);
     }
 }
 
