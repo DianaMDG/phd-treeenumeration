@@ -5,7 +5,7 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       8         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define N      7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 #define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
 #define K       (N-3)     /*Number of information bits*/
 
@@ -78,7 +78,7 @@ void generate_seq(int spaces, int *generated) {
             for ( j = 0; j < SIZE-2; j++) {
                 printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
             }*/
-            /*printf("Will generate a new tree:\n");*/
+            printf("\n\nWill generate a new tree:\n\n\n");
 
             /*Generate tree associated to the sequence generated*/
             generate_tree(generated);
@@ -89,26 +89,40 @@ void generate_seq(int spaces, int *generated) {
 
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq){
-    int i, j;
+    int i;
     int degree[SIZE];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
+    int heap[SIZE-2] = {0}; /*each tree has at least 2 leaves*/
+    int ind = 0;        /*auxiliary variable to know in which position of heap we are*/
 
     /*1st step - degree array construction*/
     for (i = 0; i < SIZE; i++){
         degree[i] = 1;
     }
     for (i = 0; i < SIZE-2; i++){
-        degree[seq[i]] += 1;
+        degree[seq[i]]++;
     }
-
-    /*check first node with degree equal to 1 */
-    for (i = 0; i < SIZE; i++){
+    /*fill heap*/
+    for (i = 0; i < SIZE; i++) {
+        if (degree[i] == 1) {
+            /*printf("Antes: i = %d, degree[i] = %d, ind = %d, heap[ind] = %d.\n", i, degree[i], ind, heap[ind]);*/
+            heap[ind] = i;
+            printf("Antes: i = %d, degree[i] = %d, ind = %d, heap[ind] = %d.\n", i, degree[i], ind, heap[ind]);
+            ind++;
+        }
+    }
+    /*check first node with degree equal to 1 --> Replaced by HEAP*/
+    /*for (i = 0; i < SIZE; i++){
         if (degree[i]==1) {
             x = i;
             index = x;
             break;
         }
-    }
+    }*/
+
+    ind = 0;
+    index = x = heap[ind];
+    ind++;
     /*Graph edge definition and degree array destruction*/
     for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
         y = seq[i];
@@ -116,24 +130,34 @@ void generate_tree(int *seq){
         degree[y] -= 1;
         if ((y < index) && (degree[y] == 1)) {
             x = y;
+            if (i == (SIZE)-3) { printf("CENAS A: x = %d\n", x); }
         }
         else {
-            for (j = index + 1; j < SIZE; j++){
+        
+            if (i == (SIZE)-3) { printf("CENAS B: ind = %d\n", ind); }
+            index = x = heap[ind];
+            ind++;
+            
+            
+            if (i == (SIZE)-3) { printf("CENAS B: x = %d\n", x); }
+            /*for (j = index + 1; j < SIZE; j++){
                 if (degree[j]==1) {
                     index = x = j;
                     break;
                 }
-            }
+            }*/
         }
     }
     y = SIZE-1;
+    printf("x = %d, y = %d, ind = %d.\n", x, y, ind);
     lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
-    
+
     /*print adjacency matrix*/
     /*print_adj();*/
 
     /*Calculate the graph associated with it*/
     /*generate_graph();*/
+
     /*Clear Adj matrix*/
     clear_adj();
 }
