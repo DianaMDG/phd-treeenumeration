@@ -5,7 +5,7 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define N       11         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 #define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
 #define K       (N-3)     /*Number of information bits*/
 
@@ -18,6 +18,9 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 uint16_t g_3 = 0xb;
+typedef char bool;
+#define true 1
+#define false 0
 
 /*Triangular Adjacency matrix*/
 ele_t adjacency[(SIZE-1)*(SIZE)/2];
@@ -77,12 +80,13 @@ void generate_seq(int spaces, int *generated) {
             /*Prints the current sequence values*/
             /*printf("\nNew sequence: [");
             for ( j = 0; j < SIZE-2; j++) {
-                printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
+                printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]");
             }*/
             /*printf("Will generate a new tree:\n");*/
 
             /*Generate tree associated to the sequence generated*/
-            generate_tree(generated);
+            check_seq(generated);
+            /*generate_tree(generated);*/
             /*break;*/
          }
      }
@@ -232,11 +236,96 @@ void print_adj() {
     }
 }
 
-/*Function that clears an adjacency matrix -> sets to zero */
+/*Function that clears an adjacency matrix */
 void clear_adj() {
-    /*NOTE: */
+    /*NOTE: sets all values to 0*/
     int i;
     for (i=0; i < (SIZE)*(SIZE-1)/2; i++) {
         adjacency[i] = 0;
+    }
+}
+
+/*Function that verifies if the sequance is valid or not*/
+void check_seq(int *seq) {
+    /*NOTE: the sequence is valid if both edges (0,1) and (0,2) are in the tree, so this verification guaranties if the sequence fulfills the requirements for that to be true.*/
+    int i = 0;
+    int last_zero = -1, last_one = -1, last_two = -1;/*index of the last corresponding occurrence.Only used if it exists.*/
+
+    /*Verify if 0, 1 and 2 is in the sequence*/
+    for (i = (SIZE - 3); i >= 0; i--) {
+        if (last_one < 0 && seq[i] == 1) {
+            last_one = i;
+        }
+        else if (last_two < 0 && seq[i] == 2) {
+            last_two = i;
+        }
+        else if (last_zero < 0 && seq[i] == 0) {
+            last_zero = i;
+        }
+    }
+    if (last_zero > -1) {
+        if ( last_one < 0 ) {
+            if ( last_two < 0 ) {                             /* First Case */
+                if ((seq[0] == 0) && (seq[1] == 0)) {
+                    /*printf("\tAPPROVED!!!!!!\n");*/
+                    generate_tree(seq);
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+            else {                                      /* Second Case */
+                /* Checks ...02... OR ...20... AND 0...*/
+                if (seq[0] == 0) {
+                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2) || (last_two != (SIZE-3) && seq[last_two + 1] == 0)) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        generate_tree(seq);
+                    }
+                    else {
+                        /*printf("\tREJECTED\n");*/
+                        return;
+                    }
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+        }
+        else {
+            if ( last_two < 0 ) {                             /* Third Case */
+                /* Checks ...01... OR ...10... AND 0...*/
+                if (seq[0] == 0) {
+                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1) || (last_one != (SIZE-3) && seq[last_one + 1] == 0)) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        generate_tree(seq);
+                    }
+                    else {
+                        /*printf("\tREJECTED\n");*/
+                        return;
+                    }
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+            else {                                      /* Forth Case */
+                /* Checks ...10...02... OR ...20...01... */
+                if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 2)) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 1))) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        generate_tree(seq);
+                    }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+        }
+    }
+    else {
+        /*printf("\tREJECTED\n");*/
+        return;
     }
 }
