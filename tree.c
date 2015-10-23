@@ -5,9 +5,11 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N      7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
-#define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
-#define K       (N-3)     /*Number of information bits*/
+#define N       15           /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define SIZE    (N+1)        /*Number of syndromes, number of nodes in the tree*/
+/*#define K       (N-3)      /*Number of information bits*/*/
+#define K       kappa[N-4]     /*Number of information bits*/
+#define G       generator[N-4] /*Generator polynomial*/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -17,7 +19,14 @@
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
+              /*  indices: 4 , 5 , 6 , 7 , 8 , 9 , 10, 11, 12, 13, 14, 15, 16 */
+int      kappa[13]     = { 3 , 4 , 4 , 4 , 1 , 2 , 4 ,  1, 10, 12, 11, 11, 15 }; /*information bits*/
+uint16_t generator[13] = {  };
+
 uint16_t g_3 = 0xb;
+typedef char bool;
+#define true 1
+#define false 0
 
 /*Triangular Adjacency matrix*/
 ele_t adjacency[(SIZE-1)*(SIZE)/2];
@@ -25,17 +34,21 @@ ele_t *lines[SIZE-1];
 
 /*ele_t adjacency[SIZE][SIZE];*/
 
+uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
+
+int NCodigos = 0;
 
 /******************************************************************/
 /************************   MAIN   ********************************/
 /******************************************************************/
 int main() {
 
-    int generated[SIZE-2];
+    /*int generated[SIZE-2];*/
     int i;
     int a = -1;
-
+ int j;
+ uint16_t c = 0, b, t;
     /*Generate adjacency matrix and respective lines pointer array*/
     for (i=0; i < SIZE-1; i++) {
         lines[i] = adjacency + a;
@@ -43,8 +56,22 @@ int main() {
     }
 
     /*Generate Prüfer sequences*/
-    generate_seq(SIZE-2, generated);
-
+    /*generate_seq(SIZE-2, generated);*/
+    
+    /*printf("Número de códigos: %d\n", NCodigos);*/
+    
+    for (j = 0; j < N; j++) { /* for each d = 1*/
+        /*creates the word and checks syndrome*/
+        b = c ^ (uint16_t)(1<<j);
+        t = syndrome(N, K, g_3, b);
+        /*saves zero, records next_z*/
+        printf("palavra: %d, sindrome: %d\n", b, t);
+        ZAux[t] = b;
+    }
+    printf("ZAux: ");
+    for(j = 1; j < SIZE; j++)
+    printf(": %d ", ZAux[j]);
+    printf("\n");
     return 0;
 }
 
@@ -61,6 +88,7 @@ void generate_seq(int spaces, int *generated) {
     
     int i;
     /*int j;*/ /*Separated because j is unused when not printing*/
+    
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
@@ -74,14 +102,15 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-2-spaces] = i;
 
             /*Prints the current sequence values*/
-            /*printf("New sequence: [");
+            /*printf("\nNew sequence: [");
             for ( j = 0; j < SIZE-2; j++) {
-                printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]\n");
+                printf("%d %s", generated[j], j< SIZE-3 ? ",\0":"]");
             }*/
-            printf("\n\nWill generate a new tree:\n\n\n");
+            /*printf("Will generate a new tree:\n");*/
 
             /*Generate tree associated to the sequence generated*/
-            generate_tree(generated);
+            check_seq(generated);
+            /*generate_tree(generated);*/
             /*break;*/
          }
      }
@@ -89,40 +118,26 @@ void generate_seq(int spaces, int *generated) {
 
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq){
-    int i;
+    int i, j;
     int degree[SIZE];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
-    int heap[SIZE-2] = {0}; /*each tree has at least 2 leaves*/
-    int ind = 0;        /*auxiliary variable to know in which position of heap we are*/
 
     /*1st step - degree array construction*/
     for (i = 0; i < SIZE; i++){
         degree[i] = 1;
     }
     for (i = 0; i < SIZE-2; i++){
-        degree[seq[i]]++;
+        degree[seq[i]] += 1;
     }
-    /*fill heap*/
-    for (i = 0; i < SIZE; i++) {
-        if (degree[i] == 1) {
-            /*printf("Antes: i = %d, degree[i] = %d, ind = %d, heap[ind] = %d.\n", i, degree[i], ind, heap[ind]);*/
-            heap[ind] = i;
-            printf("Antes: i = %d, degree[i] = %d, ind = %d, heap[ind] = %d.\n", i, degree[i], ind, heap[ind]);
-            ind++;
-        }
-    }
-    /*check first node with degree equal to 1 --> Replaced by HEAP*/
-    /*for (i = 0; i < SIZE; i++){
+
+    /*check first node with degree equal to 1 */
+    for (i = 0; i < SIZE; i++){
         if (degree[i]==1) {
-            x = i;
-            index = x;
+            index = x = i;
             break;
         }
-    }*/
+    }
 
-    ind = 0;
-    index = x = heap[ind];
-    ind++;
     /*Graph edge definition and degree array destruction*/
     for (i = 0; i < (SIZE)-2 ; i++) { /* seq elements: 0 -> SIZE-2 */
         y = seq[i];
@@ -130,34 +145,24 @@ void generate_tree(int *seq){
         degree[y] -= 1;
         if ((y < index) && (degree[y] == 1)) {
             x = y;
-            if (i == (SIZE)-3) { printf("CENAS A: x = %d\n", x); }
         }
         else {
-        
-            if (i == (SIZE)-3) { printf("CENAS B: ind = %d\n", ind); }
-            index = x = heap[ind];
-            ind++;
-            
-            
-            if (i == (SIZE)-3) { printf("CENAS B: x = %d\n", x); }
-            /*for (j = index + 1; j < SIZE; j++){
+            for (j = index + 1; j < SIZE; j++){
                 if (degree[j]==1) {
                     index = x = j;
                     break;
                 }
-            }*/
+            }
         }
     }
     y = SIZE-1;
-    printf("x = %d, y = %d, ind = %d.\n", x, y, ind);
     lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
-
+    
     /*print adjacency matrix*/
     /*print_adj();*/
 
     /*Calculate the graph associated with it*/
-    /*generate_graph();*/
-
+    generate_graph();
     /*Clear Adj matrix*/
     clear_adj();
 }
@@ -251,15 +256,104 @@ void print_adj() {
         for (j = i+1; j < (SIZE); j++) {
             sprintf(temp, "%s%2d%c ", temp, lines[i][j], j<(SIZE-1) ? ',' : ' ');
         }
-        printf("%30s\n", temp);
+        printf("%32s\n", temp);
     }
 }
 
-/*Function that clears an adjacency matrix -> sets to zero */
+/*Function that clears an adjacency matrix */
 void clear_adj() {
-    /*NOTE: */
+    /*NOTE: sets all values to 0*/
     int i;
     for (i=0; i < (SIZE)*(SIZE-1)/2; i++) {
         adjacency[i] = 0;
+    }
+}
+
+/*Function that verifies if the sequance is valid or not*/
+void check_seq(int *seq) {
+    /*NOTE: the sequence is valid if both edges (0,1) and (0,2) are in the tree, so this verification guaranties if the sequence fulfills the requirements for that to be true.*/
+    int i = 0;
+    int last_zero = -1, last_one = -1, last_two = -1;/*index of the last corresponding occurrence.Only used if it exists.*/
+
+    /*Verify if 0, 1 and 2 is in the sequence*/
+    for (i = (SIZE - 3); i >= 0; i--) {
+        if (last_one < 0 && seq[i] == 1) {
+            last_one = i;
+        }
+        else if (last_two < 0 && seq[i] == 2) {
+            last_two = i;
+        }
+        else if (last_zero < 0 && seq[i] == 0) {
+            last_zero = i;
+        }
+    }
+    if (last_zero > -1) {
+        if ( last_one < 0 ) {
+            if ( last_two < 0 ) {                             /* First Case */
+                if ((seq[0] == 0) && (seq[1] == 0)) {
+                    /*printf("\tAPPROVED!!!!!!\n");*/
+                    NCodigos++;
+                    generate_tree(seq);
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+            else {                                      /* Second Case */
+                /* Checks ...02... OR ...20... AND 0...*/
+                if (seq[0] == 0) {
+                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2) || (last_two != (SIZE-3) && seq[last_two + 1] == 0)) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        NCodigos++;
+                        generate_tree(seq);
+                    }
+                    else {
+                        /*printf("\tREJECTED\n");*/
+                        return;
+                    }
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+        }
+        else {
+            if ( last_two < 0 ) {                             /* Third Case */
+                /* Checks ...01... OR ...10... AND 0...*/
+                if (seq[0] == 0) {
+                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1) || (last_one != (SIZE-3) && seq[last_one + 1] == 0)) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        NCodigos++;
+                        generate_tree(seq);
+                    }
+                    else {
+                        /*printf("\tREJECTED\n");*/
+                        return;
+                    }
+                }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+            else {                                      /* Forth Case */
+                /* Checks ...10...02... OR ...20...01... */
+                if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 2)) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 1))) {
+                        /*printf("\tAPPROVED!!!!!!\n");*/
+                        NCodigos++;
+                        generate_tree(seq);
+                    }
+                else {
+                    /*printf("\tREJECTED\n");*/
+                    return;
+                }
+            }
+        }
+    }
+    else {
+        /*printf("\tREJECTED\n");*/
+        return;
     }
 }
