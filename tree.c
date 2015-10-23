@@ -5,9 +5,11 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       7         /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
-#define SIZE    (N+1)     /*Number of syndromes, number of nodes in the tree*/
-#define K       (N-3)     /*Number of information bits*/
+#define N       15           /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define SIZE    (N+1)        /*Number of syndromes, number of nodes in the tree*/
+/*#define K       (N-3)      /*Number of information bits*/*/
+#define K       kappa[N-4]     /*Number of information bits*/
+#define G       generator[N-4] /*Generator polynomial*/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -16,6 +18,10 @@
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
+
+              /*  indices: 4 , 5 , 6 , 7 , 8 , 9 , 10, 11, 12, 13, 14, 15, 16 */
+int      kappa[13]     = { 3 , 4 , 4 , 4 , 1 , 2 , 4 ,  1, 10, 12, 11, 11, 15 }; /*information bits*/
+uint16_t generator[13] = {  };
 
 uint16_t g_3 = 0xb;
 typedef char bool;
@@ -28,6 +34,7 @@ ele_t *lines[SIZE-1];
 
 /*ele_t adjacency[SIZE][SIZE];*/
 
+uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
 
 int NCodigos = 0;
@@ -37,10 +44,11 @@ int NCodigos = 0;
 /******************************************************************/
 int main() {
 
-    int generated[SIZE-2];
+    /*int generated[SIZE-2];*/
     int i;
     int a = -1;
-
+ int j;
+ uint16_t c = 0, b, t;
     /*Generate adjacency matrix and respective lines pointer array*/
     for (i=0; i < SIZE-1; i++) {
         lines[i] = adjacency + a;
@@ -48,10 +56,22 @@ int main() {
     }
 
     /*Generate Prüfer sequences*/
-    generate_seq(SIZE-2, generated);
+    /*generate_seq(SIZE-2, generated);*/
     
-    printf("Número de códigos: %d\n", NCodigos);
-
+    /*printf("Número de códigos: %d\n", NCodigos);*/
+    
+    for (j = 0; j < N; j++) { /* for each d = 1*/
+        /*creates the word and checks syndrome*/
+        b = c ^ (uint16_t)(1<<j);
+        t = syndrome(N, K, g_3, b);
+        /*saves zero, records next_z*/
+        printf("palavra: %d, sindrome: %d\n", b, t);
+        ZAux[t] = b;
+    }
+    printf("ZAux: ");
+    for(j = 1; j < SIZE; j++)
+    printf(": %d ", ZAux[j]);
+    printf("\n");
     return 0;
 }
 
@@ -142,7 +162,7 @@ void generate_tree(int *seq){
     /*print_adj();*/
 
     /*Calculate the graph associated with it*/
-    /*generate_graph();*/
+    generate_graph();
     /*Clear Adj matrix*/
     clear_adj();
 }
