@@ -5,11 +5,12 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       15           /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
-#define SIZE    (N+1)        /*Number of syndromes, number of nodes in the tree*/
-/*#define K       (N-3)      /*Number of information bits*/*/
-#define K       kappa[N-4]     /*Number of information bits*/
-#define G       generator[N-4] /*Generator polynomial*/
+#define N       15                       /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+#define SIZE    (N+1)                   /*Number of syndromes, number of nodes in the tree*/
+/*#define K       (N-3)                */ /*Number of information bits*/
+#define K       (N-4)              /**/ /*Number of information bits*/
+/*#define G      ((uint16_t ) 0xb )    */ /*Generator polynomial for the ( 7, 4) code */
+#define G      ((uint16_t ) 0x13)  /**/ /*Generator polynomial for the (15,11) code */
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -19,11 +20,6 @@
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
-              /*  indices: 4 , 5 , 6 , 7 , 8 , 9 , 10, 11, 12, 13, 14, 15, 16 */
-int      kappa[13]     = { 3 , 4 , 4 , 4 , 1 , 2 , 4 ,  1, 10, 12, 11, 11, 15 }; /*information bits*/
-uint16_t generator[13] = {  };
-
-uint16_t g_3 = 0xb;
 typedef char bool;
 #define true 1
 #define false 0
@@ -37,41 +33,51 @@ ele_t *lines[SIZE-1];
 uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
 
-int NCodigos = 0;
+/*int NCodigos = 0;*/
+
+/*int SCount = 0;*/
 
 /******************************************************************/
 /************************   MAIN   ********************************/
 /******************************************************************/
 int main() {
 
-    /*int generated[SIZE-2];*/
+    int generated[SIZE-2];
     int i;
     int a = -1;
- int j;
- uint16_t c = 0, b, t;
+    int j;
+    uint16_t c = 0, b, t;
+    /*uint16_t x = 0477, y = 3;*/
+    
     /*Generate adjacency matrix and respective lines pointer array*/
     for (i=0; i < SIZE-1; i++) {
         lines[i] = adjacency + a;
         a += N - i - 1; /*a += SIZE - 2 - i;*/
     }
-
-    /*Generate Prüfer sequences*/
-    /*generate_seq(SIZE-2, generated);*/
     
-    /*printf("Número de códigos: %d\n", NCodigos);*/
     
-    for (j = 0; j < N; j++) { /* for each d = 1*/
+    /*Generates array of words with each syndrome which have */
+    for (j = 0; j < N; j++) {
         /*creates the word and checks syndrome*/
         b = c ^ (uint16_t)(1<<j);
-        t = syndrome(N, K, g_3, b);
+        t = syndrome(N, K, G, b);
+        
+        /*printf("j : %d\t word : %d\t syndrome : %d \n", j, b, t);*/
         /*saves zero, records next_z*/
-        printf("palavra: %d, sindrome: %d\n", b, t);
+        /*printf("palavra: %d, sindrome: %d\n", b, t);*/
         ZAux[t] = b;
     }
     printf("ZAux: ");
     for(j = 1; j < SIZE; j++)
-    printf(": %d ", ZAux[j]);
+        printf(": %d ", ZAux[j]);
     printf("\n");
+    
+    /*printf("palavra a distancia 1 de: %o (síndrome %d), com sindrome: %d (%o)= %o (%d)\n", x, syndrome(N, K, G, x),  y, ZAux[syndrome(N, K, G, x)^(y)], x^ZAux[syndrome(N, K, G, x)^y], syndrome(N,K,G,x^ZAux[syndrome(N, K, G, x)^y]));*/
+    
+    /*Generate Prüfer sequences*/
+    generate_seq(SIZE-2, generated);
+    /*printf("Número de códigos: %d\n", NCodigos);*/
+    /*printf("numero de codigos: %d\n", Scount);*/
     return 0;
 }
 
@@ -87,17 +93,18 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
     
     int i;
-    /*int j;*/ /*Separated because j is unused when not printing*/
+    /*int j; *//*Separated because j is unused when not printing*/
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
+            if (i == 3) break;
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
         }
     }
     else {
-        /*It is now in the last sequence space*/
+        /*It is now in the last sequence element*/
         for (i = 0; i< (SIZE); i++) {
             generated[SIZE-2-spaces] = i;
 
@@ -108,6 +115,7 @@ void generate_seq(int spaces, int *generated) {
             }*/
             /*printf("Will generate a new tree:\n");*/
 
+            /*Scount++;*/
             /*Generate tree associated to the sequence generated*/
             check_seq(generated);
             /*generate_tree(generated);*/
@@ -118,6 +126,7 @@ void generate_seq(int spaces, int *generated) {
 
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq){
+    /*NOTE: The decodig algorithm implemented in this functions runs in O(n), as is explained in Wang et al; "An Optimal Algorithm for Prüfer Codes" J. Software Engineering & Applications, 2009, 2 (111-115)*/
     int i, j;
     int degree[SIZE];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
@@ -173,16 +182,13 @@ void generate_graph() {
     /*It operates in two steps: FIRST, from the tree root(0), checks all nodes directly connected. For each, searches the corresponding word, with Hamming distance 1 and with the corresponding Syndrome. Then, recursively does it for the other nodes. SECONDLY, Knowing that the graph has at least the tree edges, the edges with 0(zero) in the tree adjacency matrix are tested for their Hamming distance, being set to one in the graph adjacency matrix if distance is 1.*/
     /*WARNING: The graph's edges info is in the form of the second bit of the adjacency matrix. Changing this way of doing implies refactoring this function*/
 
-    int i, j, k;
-    /*int a;*/
-    int next = 1, count = 1;
-    uint16_t t_s, t_w; /*temporary syndrome and word*/
-    uint16_t next_z[SIZE];
+    int i, k;
+    int a;
+    int next = 1; /*next zero to be set*/
+    int count = 1; /* number of zeros defined*/
+    /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
+    uint16_t next_z[SIZE] = {0, 1, 2};
 
-    /*First step*/
-    for (i = 0; i < SIZE; i++) {
-        next_z[i]=0;
-    }
     /*for each element of next_z*/
     for (k = 0; k < SIZE; k++) {
         if (count == 8) {
@@ -194,19 +200,9 @@ void generate_graph() {
                 break;
             }
             if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
-                count +=1;
-                for (j = 0; j < N; j++) { /* for each d = 1*/
-                    /*creates the word and checks syndrome*/
-                    t_w = Z[next_z[k]] ^ (uint16_t)(1<<j);
-                    t_s = syndrome(N, K, g_3, t_w);
-                    if (t_s == i) {
-                        /*saves zero, records next_z, breaks inner cycle*/
-                        Z[i] = t_w;
-                        next_z[next] = i;
-                        next +=1;
-                        break;
-                    }
-                }
+                count++;
+                Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
+                next_z[next++]=i;
             }
         }
         /*and columns*/
@@ -215,29 +211,19 @@ void generate_graph() {
                 break;
             }
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
-                count += 1;
-                for (j = 0; j < N; j++) { /* for each d = 1*/
-                    /*creates the word and checks syndrome*/
-                    t_w = Z[next_z[k]] ^ (uint16_t)(1<<j);
-                    t_s = syndrome(N, K, g_3, t_w);
-                    if (t_s == i) {
-                        /*saves zero, records next_z, breaks inner cycle*/
-                        Z[i] = t_w;
-                        next_z[next] = i;
-                        next +=1;
-                        break;
-                    }
-                }
+                count++;
+                Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
+                next_z[next++]=i;
             }
         }
     }
     /*print Z*/
-    /*printf("Zero vector: \n");
+    /*printf("Zero vector: \n");*/
     for (a = 0; a < SIZE; a++) {
-        printf("%d%c ", Z[a], a < N ? ',' : ' ');
+        /*printf("%d%c ", Z[a], a < N ? ',' : '\n');*/
         Z[a] = 0;
     }
-    printf("\n");*/
+    /*printf("\n");*/
 
 }
 
@@ -292,7 +278,7 @@ void check_seq(int *seq) {
             if ( last_two < 0 ) {                             /* First Case */
                 if ((seq[0] == 0) && (seq[1] == 0)) {
                     /*printf("\tAPPROVED!!!!!!\n");*/
-                    NCodigos++;
+                    /*NCodigos++;*/
                     generate_tree(seq);
                 }
                 else {
@@ -305,7 +291,7 @@ void check_seq(int *seq) {
                 if (seq[0] == 0) {
                     if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2) || (last_two != (SIZE-3) && seq[last_two + 1] == 0)) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        NCodigos++;
+                        /*NCodigos++;*/
                         generate_tree(seq);
                     }
                     else {
@@ -325,7 +311,7 @@ void check_seq(int *seq) {
                 if (seq[0] == 0) {
                     if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1) || (last_one != (SIZE-3) && seq[last_one + 1] == 0)) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        NCodigos++;
+                        /*NCodigos++;*/
                         generate_tree(seq);
                     }
                     else {
@@ -342,7 +328,7 @@ void check_seq(int *seq) {
                 /* Checks ...10...02... OR ...20...01... */
                 if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 2)) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 1))) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        NCodigos++;
+                        /*NCodigos++;*/
                         generate_tree(seq);
                     }
                 else {
