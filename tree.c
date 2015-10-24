@@ -85,8 +85,6 @@ int main() {
         printf(": %d ", ZAux[j]);
     printf("\n");
     */
-    /*printf("palavra a distancia 1 de: %o (síndrome %d), com sindrome: %d (%o)= %o (%d)\n", x, syndrome(N, K, G, x),  y, ZAux[syndrome(N, K, G, x)^(y)], x^ZAux[syndrome(N, K, G, x)^y], syndrome(N,K,G,x^ZAux[syndrome(N, K, G, x)^y]));*/
-    
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-2, generated);
     /*printf("Número de códigos: %d\n", NCodigos);*/
