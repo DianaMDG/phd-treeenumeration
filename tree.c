@@ -5,12 +5,25 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       15                       /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
-#define SIZE    (N+1)                   /*Number of syndromes, number of nodes in the tree*/
-/*#define K       (N-3)                */ /*Number of information bits*/
-#define K       (N-4)              /**/ /*Number of information bits*/
-/*#define G      ((uint16_t ) 0xb )    */ /*Generator polynomial for the ( 7, 4) code */
-#define G      ((uint16_t ) 0x13)  /**/ /*Generator polynomial for the (15,11) code */
+/*NOTE*/
+/* N    : Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+/* SIZE : Number of syndromes, number of nodes in the tree*/
+/* K    : Number of information bits*/
+/* G    : Generator polynomial for the codes */
+
+
+/* Data for the NN(7,4) codes*/
+/*#define N       7
+#define SIZE    (N+1)
+#define K       (N-3)
+#define G      ((uint16_t ) 0xb )
+*/
+
+/* Data for the NN(15,11) codes*/
+#define N       15
+#define SIZE    (N+1)
+#define K       (N-4)
+#define G      ((uint16_t ) 0x13)
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -97,7 +110,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            if (i == 4) break;
+            if (i == 3) break;
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
