@@ -97,7 +97,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            if (i == 3) break;
+            if (i == 4) break;
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -189,16 +189,25 @@ void generate_graph() {
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
     uint16_t next_z[SIZE] = {0, 1, 2};
 
-    /*for each element of next_z*/
-    for (k = 0; k < SIZE; k++) {
-        if (count == SIZE) {
-            break;
+
+    /*for the first known elements of the sequence: 0, 1, 2*/
+    for(k = 0; k<3; k++) {
+        if (count == SIZE) return;
+        for (i = 3; i < SIZE; i++) {
+            if (count == SIZE) return;
+            if (lines[k][i] == 1) {
+                count++;
+                Z[i] = Z[k]^ZAux[(k^i)];
+                next_z[next++] = i;
+            }
         }
+    }
+    /*for each element of next_z, all besides 0, 1, 2*/
+    for (k = 0; k < SIZE; k++) {
+        if (count == SIZE) return;
         /*Checks edges in adjacency lines*/
         for (i = next_z[k] + 1; i < SIZE; i++) {
-            if (count == SIZE) {
-                break;
-            }
+            if (count == SIZE) return;
             if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
                 count++;
                 Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
@@ -206,14 +215,12 @@ void generate_graph() {
             }
         }
         /*and columns*/
-        for (i = 1; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
-            if (count == SIZE) {
-                break;
-            }
+        for (i = 3; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
+            if (count == SIZE) return;
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
                 count++;
                 Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
-                next_z[next++]=i;
+                next_z[next++] = i;
             }
         }
     }
