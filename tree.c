@@ -97,7 +97,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            /*if (i == 3) break;*/
+            if (i == 3) break;
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -191,12 +191,12 @@ void generate_graph() {
 
     /*for each element of next_z*/
     for (k = 0; k < SIZE; k++) {
-        if (count == 8) {
+        if (count == SIZE) {
             break;
         }
         /*Checks edges in adjacency lines*/
         for (i = next_z[k] + 1; i < SIZE; i++) {
-            if (count == 8) {
+            if (count == SIZE) {
                 break;
             }
             if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
@@ -207,7 +207,7 @@ void generate_graph() {
         }
         /*and columns*/
         for (i = 1; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
-            if (count == 8) {
+            if (count == SIZE) {
                 break;
             }
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
