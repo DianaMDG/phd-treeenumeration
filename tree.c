@@ -5,12 +5,25 @@
 #include"tree.h"
 #include"neutral_rep.h"
 
-#define N       15                       /*Number of bis used by the representation, N used in the neutral network NN(n,k)*/
-#define SIZE    (N+1)                   /*Number of syndromes, number of nodes in the tree*/
-/*#define K       (N-3)                */ /*Number of information bits*/
-#define K       (N-4)              /**/ /*Number of information bits*/
-/*#define G      ((uint16_t ) 0xb )    */ /*Generator polynomial for the ( 7, 4) code */
-#define G      ((uint16_t ) 0x13)  /**/ /*Generator polynomial for the (15,11) code */
+/*NOTE*/
+/* N    : Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+/* SIZE : Number of syndromes, number of nodes in the tree*/
+/* K    : Number of information bits*/
+/* G    : Generator polynomial for the codes */
+
+
+/* Data for the NN(7,4) codes*/
+/*#define N       7
+#define SIZE    (N+1)
+#define K       (N-3)
+#define G      ((uint16_t ) 0xb )
+*/
+
+/* Data for the NN(15,11) codes*/
+#define N       15
+#define SIZE    (N+1)
+#define K       (N-4)
+#define G      ((uint16_t ) 0x13)
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -191,13 +204,13 @@ void generate_graph() {
 
     /*for each element of next_z*/
     for (k = 0; k < SIZE; k++) {
-        if (count == 8) {
-            break;
+        if (count == SIZE){
+            goto CUIDADO;
         }
         /*Checks edges in adjacency lines*/
         for (i = next_z[k] + 1; i < SIZE; i++) {
-            if (count == 8) {
-                break;
+            if (count == SIZE) {
+                goto CUIDADO;
             }
             if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
                 count++;
@@ -207,8 +220,8 @@ void generate_graph() {
         }
         /*and columns*/
         for (i = 1; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
-            if (count == 8) {
-                break;
+            if (count == SIZE) {
+                goto CUIDADO;
             }
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
                 count++;
@@ -219,6 +232,7 @@ void generate_graph() {
     }
     /*print Z*/
     /*printf("Zero vector: \n");*/
+    CUIDADO:
     for (a = 0; a < SIZE; a++) {
         /*printf("%d%c ", Z[a], a < N ? ',' : '\n');*/
         Z[a] = 0;
