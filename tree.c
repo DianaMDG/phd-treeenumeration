@@ -13,17 +13,17 @@
 
 
 /* Data for the NN(7,4) codes*/
-/*#define N       7
+#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-*/
+
 
 /* Data for the NN(15,11) codes*/
-#define N       15
+/*#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
-#define G      ((uint16_t ) 0x13)
+#define G      ((uint16_t ) 0x13)*/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -108,7 +108,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            if (i == 3) break;
+            if (i == 4) break;
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -200,9 +200,25 @@ void generate_graph() {
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
     uint16_t next_z[SIZE] = {0, 1, 2};
 
-    /*for each element of next_z*/
-    for (k = 0; k < SIZE; k++) {
-        if (count == SIZE){
+    /*for the first known elements of the sequence: 0, 1, 2*/
+    for(k = 0; k<3; k++) {
+        if (count == SIZE) {
+            goto CUIDADO;
+        }
+        for (i = 3; i < SIZE; i++) {
+            if (count == SIZE) {
+                goto CUIDADO;
+            }
+            if (lines[k][i] == 1) {
+                count++;
+                Z[i] = Z[k]^ZAux[(k^i)];
+                next_z[next++] = i;
+            }
+        }
+    }
+    /*for each element of next_z, all besides 0, 1, 2*/
+    for (k = 0 ; k < SIZE - 3; k++) {
+        if (count == SIZE) {
             goto CUIDADO;
         }
         /*Checks edges in adjacency lines*/
@@ -217,7 +233,7 @@ void generate_graph() {
             }
         }
         /*and columns*/
-        for (i = 1; i < next_z[k]; i++){ /*start in 1 because 1st iteration is with z = 0, and there is no need to repeat*/
+        for (i = 3; i < next_z[k]; i++){ /*start in 3 because 1st iterations are with z = 0, 1, 2, and there is no need to repeat*/
             if (count == SIZE) {
                 goto CUIDADO;
             }
