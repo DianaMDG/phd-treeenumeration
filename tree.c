@@ -13,17 +13,17 @@
 
 
 /* Data for the NN(7,4) codes*/
-/*#define N       7
+#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-*/
+
 
 /* Data for the NN(15,11) codes*/
-#define N       15
+/*#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
-#define G      ((uint16_t ) 0x13)
+#define G      ((uint16_t ) 0x13)*/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -46,7 +46,7 @@ ele_t *lines[SIZE-1];
 uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
 
-/*int NCodigos = 0;*/
+int NCodigos = 0;
 
 /*int SCount = 0;*/
 
@@ -87,7 +87,7 @@ int main() {
     */
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-2, generated);
-    /*printf("Número de códigos: %d\n", NCodigos);*/
+    printf("Número de códigos: %d\n", NCodigos);
     /*printf("numero de codigos: %d\n", Scount);*/
     return 0;
 }
@@ -108,7 +108,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 0; i < SIZE; i++) {
-            if (i == 3) break;
+            /*if (i == 3) break;*/
             generated[SIZE-2-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -290,7 +290,7 @@ void check_seq(int *seq) {
             if ( last_two < 0 ) {                             /* First Case */
                 if ((seq[0] == 0) && (seq[1] == 0)) {
                     /*printf("\tAPPROVED!!!!!!\n");*/
-                    /*NCodigos++;*/
+                    NCodigos++;
                     generate_tree(seq);
                 }
                 else {
@@ -303,7 +303,7 @@ void check_seq(int *seq) {
                 if (seq[0] == 0) {
                     if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2) || (last_two != (SIZE-3) && seq[last_two + 1] == 0)) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
+                        NCodigos++;
                         generate_tree(seq);
                     }
                     else {
@@ -323,7 +323,7 @@ void check_seq(int *seq) {
                 if (seq[0] == 0) {
                     if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1) || (last_one != (SIZE-3) && seq[last_one + 1] == 0)) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
+                        NCodigos++;
                         generate_tree(seq);
                     }
                     else {
@@ -338,9 +338,9 @@ void check_seq(int *seq) {
             }
             else {                                      /* Forth Case */
                 /* Checks ...10...02... OR ...20...01... */
-                if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 2)) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && (last_zero != (SIZE-3) && seq[last_zero + 1] == 1))) {
+                if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2)||(last_two != (SIZE-3) && seq[last_two + 1] == 0))) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1)||(last_one != (SIZE-3) && seq[last_one + 1] == 0)))) {
                         /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
+                        NCodigos++;
                         generate_tree(seq);
                     }
                 else {
