@@ -24,7 +24,7 @@
 #define SIZE    (N+1)
 #define K       (N-4)
 #define G      ((uint16_t ) 0x13)
-/**/
+
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -198,7 +198,7 @@ void generate_tree(int *seq){
     /*print_adj();*/
 
     /*Calculate the graph associated with it*/
-    generate_graph();
+/*    generate_graph();*/
     /*Clear Adj matrix*/
     clear_adj();
 }
