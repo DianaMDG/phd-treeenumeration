@@ -31,4 +31,4 @@ void generate_graph();
 /*Function that verifies if the sequance is valid or not*/
 void check_seq(int *seq);
 
-void recursive(int degree, int *seq);
+void recursive(int degree, int next_edge, int *edges);
