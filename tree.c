@@ -38,18 +38,16 @@ typedef char bool;
 #define true 1
 #define false 0
 
-/*Triangular Adjacency matrix*/
-ele_t adjacency[(SIZE+1)*(SIZE)/2];
-ele_t *lines[SIZE];
+ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
+ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
 
+int list[SIZE][SIZE-1] = {1,2};         /*Adjacency list*/
 
-uint16_t ZAux[SIZE] = {0};
-uint16_t Z[SIZE] = {0,1,2};
+uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
+uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
 
 /*unsigned long long int NCodigos = 0;*/
-/*int SCount = 0;*/
-
-/*int aaa = 0, bbb = 0, ccc = 0;*/
+/*int                    SCount = 0;*/
 
 /*FILE *f_seq , *f_cod;*/
 
@@ -90,13 +88,17 @@ int main() {
     
     /*printf("ZAux: ");*/
     /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
+    
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-4, generated);
     /*generate_tree(teste);*/
+    
     /*printf("Número de códigos: %lld\n", NCodigos);*/
     /*printf("numero de sequências: %d\n", SCount);*/
+
     /*fclose(f_seq);
     fclose(f_cod);*/
+
     return 0;
 }
 
@@ -110,10 +112,10 @@ void generate_seq(int spaces, int *generated) {
     /* spaces    - blank spaces in the sequence to fill up*/
     /* generated - sequence generated so far */
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
-    
+
     int i;
     /*int j;*/ /*used for printing*/
-    
+
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
             if (i == 7) break;
@@ -184,6 +186,8 @@ void generate_tree(int *seq){
     y = SIZE;
     lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
 
+
+
     /*check edges connecting to SUPER NODE */
     for (i = 3, j = 0; i < SIZE; i++) {
         if (lines[i][SIZE] == TREE) {
@@ -213,14 +217,23 @@ void recursive(int degree, int next_edge, int *edges) {
             lines[i][edges[next_edge]] = 1;
             /*print_adj();*/
             /*NCodigos++;*/
+            build_list();
             generate_graph();
             lines[i][edges[next_edge]] = 0;
         }
     }
 }
 
+void build_list(void) {
+    int i;
+    /*edges (0,1) and (0,2) already set to 1*/
+    for (i = 0; i < 3; i++) {
+    
+    }
+}
+
 /*Function that generates the neutral network graph from the tree*/
-void generate_graph() {
+void generate_graph(void) {
     /*NOTE: This function populates the Zeros array of the neutral neutwork and calculates the graph's edges*/
     /*It operates in two steps: FIRST, from the tree root(0), checks all nodes directly connected. For each, searches the corresponding word, with Hamming distance 1 and with the corresponding Syndrome. Then, recursively does it for the other nodes. SECONDLY, Knowing that the graph has at least the tree edges, the edges with 0(zero) in the tree adjacency matrix are tested for their Hamming distance, being set to one in the graph adjacency matrix if distance is 1.*/
     /*WARNING: The graph's edges info is in the form of the second bit of the adjacency matrix. Changing this way of doing implies refactoring this function*/
@@ -249,7 +262,7 @@ void generate_graph() {
             }
         }
     }
-        
+
     /*for each element of next_z, all besides 0, 1, 2*/
     for (k = 0 ; k < SIZE - 3; k++) {
         if (count == SIZE) {
@@ -297,7 +310,7 @@ void generate_graph() {
 
 
 /*Function that prints the adjacency matrix of a given tree*/
-void print_adj() {
+void print_adj(void) {
     /*NOTE: Print adjacency matrix using array of pointers lines, and alligned to right.*/ 
     /*WARNING: Size of strings is hard coded.*/
 
@@ -316,7 +329,7 @@ void print_adj() {
 }
 
 /*Function that clears an adjacency matrix BUT THE (0,1) and (0,2) edges*/
-void clear_adj() {
+void clear_adj(void) {
     /*NOTE: sets all values to 0*/
     int i;
     for (i=2; i < (SIZE)*(SIZE+1)/2; i++) {
