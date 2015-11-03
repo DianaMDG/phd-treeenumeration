@@ -42,6 +42,7 @@ ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
 ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
 
 int list[SIZE][SIZE-1] = {1,2};         /*Adjacency list*/
+int list_index [SIZE] = {0};            /*indexes to access the current list index of a given node*/
 
 uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
 uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
@@ -67,6 +68,11 @@ int main() {
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
+    
+    /*set adjacency list to -1*/
+    for (i = 2; i < (SIZE)*(SIZE-1); i++) {
+        list[0][i] = -1;
+    }
     
     /*Generate adjacency matrix and respective lines pointer array*/
     for (i=0; i < SIZE; i++) {
@@ -149,6 +155,10 @@ void generate_tree(int *seq){
     int degree[SIZE-2];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
     int edgesSuperNode[SIZE-3] = {0}; /*values from 3 to N*/
+    /*variables to the adjacency list*/
+    int a, b;
+    int next[SIZE-3] = {SIZE};
+    int index_next = 0;
 
     /*1st step - degree array construction*/
     for (i = 0; i < (SIZE)-2; i++){
@@ -169,6 +179,17 @@ void generate_tree(int *seq){
     /*Graph edge definition and degree array destruction*/
     for (i = 0; i < (SIZE)-4 ; i++) { /* seq elements: 0 -> SIZE-2 */
         y = seq[i];
+        /*TODO Adjacency List*/
+        if ((a = max(x, y)) == SIZE) {
+            b = min(x,y);
+            list[a][list_index[b]++] = b;
+            next[index_next++] = b;
+        }
+        else {
+            list[x][list_index[y]++] = y;
+            list[y][list_index[x]++] = x;
+        }
+        
         lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
         degree[y-3] -= 1;
         if ((y < index) && (degree[y-3] == 1)) {
@@ -184,9 +205,22 @@ void generate_tree(int *seq){
         }
     }
     y = SIZE;
+    /*TODO*/
+    if ((a = max(x, y)) == SIZE) {
+            b = min(x,y);
+            list[a][list_index[b]++] = b;
+            next[index_next++] = b;
+        }
+        else {
+            list[x][list_index[y]++] = y;
+            list[y][list_index[x]++] = x;
+        }
     lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
 
-
+    /*Delete repeated nodes in Adjacency list*/
+    for (i = 0; i < SIZE , (a = list[SIZE][i]) > -1; i++) {
+        verify_node(a);
+    }
 
     /*check edges connecting to SUPER NODE */
     for (i = 3, j = 0; i < SIZE; i++) {
@@ -202,7 +236,28 @@ void generate_tree(int *seq){
     clear_adj();
 }
 
+/*Function used to delete repeated */
+void verify_node(int node) {
+    /*NOTE: For every other node connected to the given node, which is nearest the root, it deletes the extra edge (connecting from leaf to root) and sends every other node to be checked too.*/
 
+    int i, j;
+    int b;
+
+    /*for every node connecting to node*/
+    for (i = 0; (i < SIZE), (b = list[no][i]) > -1 ; i++ ) {
+        /*checks the information about the edge in the node farthest from the root*/
+        for (j = 0 ; (j < SIZE), list[b][j] > -1) {
+            if (list[b][j] == no) {
+                /*found the edge that was looking for*/
+                list[b][j] = 0;
+                break;
+            }
+        }
+        verify_node(b);
+    }
+}
+
+/*Function used to generate combinations of connections to super node*/
 void recursive(int degree, int next_edge, int *edges) {
     int i;
     if (degree > 1) {
