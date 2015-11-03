@@ -225,11 +225,20 @@ void recursive(int degree, int next_edge, int *edges) {
 }
 
 void build_list(void) {
-    int i;
-    /*edges (0,1) and (0,2) already set to 1*/
-    for (i = 0; i < 3; i++) {
+    /*NOTE: Function that builds the adjacency list*/
+    /*edges (0,1) and (0,2) already set to 1, initialization with declaration*/
     
+    int i;
+    int count = 0;
+    int next = 2;
+    
+    /*Check edges connecting to 0 (zero)*/
+    for (i = 1; i < SIZE; i++) {
+        if (lines[0][i] == 1) {
+            list[0][next++] = i;
+        }
     }
+    for ()
 }
 
 /*Function that generates the neutral network graph from the tree*/
