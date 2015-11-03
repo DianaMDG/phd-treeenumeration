@@ -17,7 +17,7 @@
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-
+/**/
 
 /* Data for the NN(15,11) codes*/
 /*#define N       15
@@ -42,15 +42,14 @@ typedef char bool;
 ele_t adjacency[(SIZE+1)*(SIZE)/2];
 ele_t *lines[SIZE];
 
-/*ele_t adjacency[SIZE][SIZE];*/
 
 uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
 
-int NCodigos = 0;
+/*unsigned long long int NCodigos = 0;*/
 int SCount = 0;
 
-int aaa = 0, bbb = 0, ccc = 0;
+/*int aaa = 0, bbb = 0, ccc = 0;*/
 
 /*FILE *f_seq , *f_cod;*/
 
@@ -62,10 +61,8 @@ int main() {
     int generated[SIZE-4];
     int i;
     int a = -1;
-    int j;
-    uint16_t c = 0, b, t;
-    /*int teste[4] = {8,8,8,8};*/
-    /*uint16_t x = 0477, y = 3;*/
+    /*int j;
+    uint16_t c = 0, b, t;*/
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
@@ -78,25 +75,22 @@ int main() {
     lines[0][1] = lines[0][2] = 1;
     
     /*Generates array of words with each syndrome which have */
-    for (j = 0; j < N; j++) {
+    /*for (j = 0; j < N; j++) {*/
         /*creates the word and checks syndrome*/
-        b = c ^ (uint16_t)(1<<j);
-        t = syndrome(N, K, G, b);
+/*        b = c ^ (uint16_t)(1<<j);
+        t = syndrome(N, K, G, b);*/
         
         /*printf("j : %d\t word : %d\t syndrome : %d \n", j, b, t);*/
         /*saves zero, records next_z*/
         /*printf("palavra: %d, sindrome: %d\n", b, t);*/
-        ZAux[t] = b;
-    }
+  /*      ZAux[t] = b;
+    }*/
     /*printf("ZAux: ");
-    for(j = 1; j < SIZE; j++)
-        printf(": %d ", ZAux[j]);
-    printf("\n");
-    */
+    for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" "); */
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-4, generated);
-/*    generate_tree(teste);*/
-    printf("Número de códigos: %d\n", NCodigos);
+
+    /*printf("Número de códigos: %lld\n", NCodigos);*/
     printf("numero de sequências: %d\n", SCount);
     /*fclose(f_seq);
     fclose(f_cod);*/
@@ -115,11 +109,11 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
     
     int i;
-    /*int j; *//*used for printing*/
+    /*int j;*/ /*used for printing*/
     
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            /*if (i == 4) break;*/
+            /*if (i == 8) break;*/
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -131,15 +125,12 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-4-spaces] = i;
 
             /*Prints the current sequence values*/
-            /*printf("\nNew sequence: [");
-            for ( j = 0; j < SIZE-4; j++) {
-                printf("%d %s", generated[j], j< SIZE-5 ? ",\0":"]\n");
-            }*/
+            /*for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
+
             /*printf("Will generate a new tree:\n");*/
 
-            /*SCount++;*/
+            SCount++;
             /*Generate tree associated to the sequence generated*/
-            /*check_seq(generated);*/
             generate_tree(generated);
             /*break;*/
         }
@@ -153,9 +144,7 @@ void generate_tree(int *seq){
     int degree[SIZE-2];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
     int edgesSuperNode[SIZE-3] = {0}; /*values from 3 to N*/
-    int degreeSuperNode;
 
-    /*NCodigos++;*/
     /*1st step - degree array construction*/
     for (i = 0; i < (SIZE)-2; i++){
         degree[i] = 1;
@@ -163,8 +152,7 @@ void generate_tree(int *seq){
     for (i = 0; i < SIZE-4; i++){
         degree[seq[i]-3] += 1;
     }
-    /*for (i = 0; i < SIZE-2 ; i++) printf("%s%d%s", i==0?"degrees: [ ":"", degree[i],i<SIZE-3?", ":"]\n" );*/
-    degreeSuperNode = degree[SIZE-3];
+
     /*check first node with degree equal to 1 */
     for (i = 3; i < SIZE+1; i++){
         if (degree[i-3]==1) {
@@ -192,34 +180,17 @@ void generate_tree(int *seq){
     }
     y = SIZE;
     lines[min(x, y)][max(x, y)] = TREE; /*Adjacency Case*/
-    
 
     /*check edges connecting to SUPER NODE */
     for (i = 3, j = 0; i < SIZE; i++) {
         if (lines[i][SIZE] == TREE) {
             edgesSuperNode[j++] = i;
-            /*printf("lines[%d][%d] = 1 |%d linhas ligadas e j: %d\n", i, SIZE, i,j);*/
         }
     }
-    /**/
-    /*printf("Matriz com os oitos\n");*/
-    print_adj();
-    aaa = j;
+    /*printf("\nMatrix with super nodes\n");
+    print_adj();*/
     recursive(j, 0, edgesSuperNode);
-    printf("TESTE: %d degree OR %d degree | %d códigos\n", aaa, degreeSuperNode, bbb);
-    aaa=bbb=0;
-    /*if(lines[0][1] == 1 && lines[0][2] == 1) { */
-        /*SCount ++;*/
-        /*for ( j = 0; j < SIZE-2; j++) {
-            fprintf(f_seq,"%s%d %s", j==0 ?"[":"" , seq[j], j< SIZE-3 ? ",\0":"]\n");
-        }
-    }*/
-    
-    /*print adjacency matrix*/
-    /*print_adj();*/
 
-    /*Calculate the graph associated with it*/
-/*    generate_graph();*/
     /*Clear Adj matrix*/
     clear_adj();
 }
@@ -227,7 +198,6 @@ void generate_tree(int *seq){
 
 void recursive(int degree, int next_edge, int *edges) {
     int i;
-    /*printf("RECURSIVE: Degree: %d| next_edge : %d\n", degree, next_edge);*/
     if (degree > 1) {
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
@@ -238,10 +208,9 @@ void recursive(int degree, int next_edge, int *edges) {
     else{
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
-            /*printf("\nMAtriz completa\n");
-            print_adj();*/
-            NCodigos++;
-            bbb++;
+            /*print_adj();*/
+            /*NCodigos++;*/
+            /*generate_graph();*/
             lines[i][edges[next_edge]] = 0;
         }
     }
