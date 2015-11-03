@@ -13,18 +13,18 @@
 
 
 /* Data for the NN(7,4) codes*/
-#define N       7
+/*#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-
+*/
 
 /* Data for the NN(15,11) codes*/
-/*#define N       15
+#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
 #define G      ((uint16_t ) 0x13)
-*/
+/**/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -46,7 +46,7 @@ ele_t *lines[SIZE];
 uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE] = {0,1,2};
 
-unsigned long long int NCodigos = 0;
+/*unsigned long long int NCodigos = 0;*/
 /*int SCount = 0;*/
 
 /*int aaa = 0, bbb = 0, ccc = 0;*/
@@ -59,13 +59,13 @@ unsigned long long int NCodigos = 0;
 /******************************************************************/
 int main() {
 
-    /*int generated[SIZE-4];*/
+    int generated[SIZE-4];
     int i;
     int a = -1;
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
-    int teste[SIZE-4] = {7,6,8,8};
+    /*int teste[SIZE-4] = {7,6,8,8};*/
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
@@ -89,11 +89,11 @@ int main() {
     }
     
     /*printf("ZAux: ");*/
-    for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");
+    /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
     /*Generate Prüfer sequences*/
-    /*generate_seq(SIZE-4, generated);*/
-    generate_tree(teste);
-    printf("Número de códigos: %lld\n", NCodigos);
+    generate_seq(SIZE-4, generated);
+    /*generate_tree(teste);*/
+    /*printf("Número de códigos: %lld\n", NCodigos);*/
     /*printf("numero de sequências: %d\n", SCount);*/
     /*fclose(f_seq);
     fclose(f_cod);*/
@@ -112,11 +112,11 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
     
     int i;
-    int j; /*used for printing*/
+    /*int j;*/ /*used for printing*/
     
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            /*if (i == 5) break;*/
+            if (i == 7) break;
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -128,9 +128,9 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-4-spaces] = i;
 
             /*Prints the current sequence values*/
-            for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+            /*for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
 
-            printf("\n\n\nWill generate a new tree:\n\n\n");
+            printf("\n\n\nWill generate a new tree:\n\n\n");*/
 
             /*SCount++;*/
             /*Generate tree associated to the sequence generated*/
@@ -227,7 +227,7 @@ void generate_graph() {
 
     int i, k;
     int a;
-    int j; /*used for printing*/
+    /*int j;*/ /*used for printing*/
     int next = 1; /*next zero to be set*/
     int count = 1; /* number of zeros defined*/
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
@@ -281,10 +281,10 @@ void generate_graph() {
 
     CUIDADO:
 
-    NCodigos++;
+    /*NCodigos++;*/
 
     /*print zero array*/
-    for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n");
+    /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n");*/
 
     /*clear Z*/
     for (a = 3; a < SIZE; a++) {
