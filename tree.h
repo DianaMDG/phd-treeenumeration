@@ -29,6 +29,7 @@ void clear_adj();
 void generate_graph();
 
 /*Function that verifies if the sequance is valid or not*/
-void check_seq(int *seq);
+/*void check_seq(int *seq);*/
 
+/*Function that recursively */
 void recursive(int degree, int next_edge, int *edges);
