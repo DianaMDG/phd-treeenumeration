@@ -13,18 +13,18 @@
 
 
 /* Data for the NN(7,4) codes*/
-/*#define N       7
+#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-*/
+
 
 /* Data for the NN(15,11) codes*/
-#define N       15
+/*#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
 #define G      ((uint16_t ) 0x13)
-/**/
+*/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -44,7 +44,7 @@ ele_t *lines[SIZE];
 
 
 uint16_t ZAux[SIZE] = {0};
-uint16_t Z[SIZE];
+uint16_t Z[SIZE] = {0,1,2};
 
 unsigned long long int NCodigos = 0;
 /*int SCount = 0;*/
@@ -52,6 +52,7 @@ unsigned long long int NCodigos = 0;
 /*int aaa = 0, bbb = 0, ccc = 0;*/
 
 /*FILE *f_seq , *f_cod;*/
+
 
 /******************************************************************/
 /************************   MAIN   ********************************/
@@ -63,7 +64,8 @@ int main() {
     int a = -1;
     int j;
     uint16_t c = 0, b, t;
-    int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};
+    /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
+    int teste[SIZE-4] = {7,6,8,8};
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
@@ -114,7 +116,7 @@ void generate_seq(int spaces, int *generated) {
     
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            if (i == 5) break;
+            /*if (i == 5) break;*/
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -209,7 +211,7 @@ void recursive(int degree, int next_edge, int *edges) {
     else{
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
-            print_adj();
+            /*print_adj();*/
             /*NCodigos++;*/
             generate_graph();
             lines[i][edges[next_edge]] = 0;
@@ -225,13 +227,14 @@ void generate_graph() {
 
     int i, k;
     int a;
+    int j; /*used for printing*/
     int next = 1; /*next zero to be set*/
     int count = 1; /* number of zeros defined*/
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
     uint16_t next_z[SIZE] = {0, 1, 2};
 
     /*for the first known elements of the sequence: 0, 1, 2*/
-    for(k = 0; k<3; k++) {
+    for (k = 0; k<3; k++) {
         if (count == SIZE) {
             goto CUIDADO;
         }
@@ -241,13 +244,12 @@ void generate_graph() {
             }
             if (lines[k][i] == 1) {
                 count++;
-                
-                printf("i: %d | k : %d | next_z[k] : %d | lines[i][next_z[k]] : %d, Z[i] : %d, Z[k] : %d\n", i, k, next_z[k], lines[i][next_z[k]], Z[i], Z[k]);
                 Z[i] = Z[k]^ZAux[(k^i)];
                 next_z[next++] = i;
             }
         }
     }
+        
     /*for each element of next_z, all besides 0, 1, 2*/
     for (k = 0 ; k < SIZE - 3; k++) {
         if (count == SIZE) {
@@ -260,7 +262,7 @@ void generate_graph() {
             }
             if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
                 count++;
-                Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
+                Z[i] = Z[next_z[k]] ^ ZAux[(next_z[k]^i)];
                 next_z[next++]=i;
             }
         }
@@ -271,23 +273,24 @@ void generate_graph() {
             }
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
                 count++;
-                printf("i: %d | k : %d | next_z[k] : %d | lines[i][next_z[k]] : %d, Z[i]\n", i, k, next_z[k], lines[i][next_z[k]]);
-                printf("Z[next_z[k]] : %d | ZAux[(next_z[k]^i)] : %d | Z[next_z[k]]^ZAux[(next_z[k]^i)] : %d\n\n", Z[next_z[k]], ZAux[(next_z[k]^i)], Z[next_z[k]]^ZAux[(next_z[k]^i)]);
-                Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
+                Z[i] = Z[next_z[k]] ^ ZAux[(next_z[k]^i)];
                 next_z[next++] = i;
             }
         }
     }
-    /*print Z*/
+
     CUIDADO:
-    
+
     NCodigos++;
-    printf("\n\nZero vector: \n");
-    for (a = 0; a < SIZE; a++) {
-        printf("%d%c ", Z[a], a < N ? ',' : '\n');
+
+    /*print zero array*/
+    for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n");
+
+    /*clear Z*/
+    for (a = 3; a < SIZE; a++) {
         Z[a] = 0;
     }
-    printf("\n");
+    /*printf("\n");*/
 
 }
 
@@ -321,107 +324,3 @@ void clear_adj() {
     }
 }
 
-/*Function that verifies if the sequance is valid or not*/
-void check_seq(int *seq) {
-    /*NOTE: the sequence is valid if both edges (0,1) and (0,2) are in the tree, so this verification guaranties if the sequence fulfills the requirements for that to be true.*/
-    int i = 0;
-    int last_zero = -1, last_one = -1, last_two = -1;/*index of the last corresponding occurrence.Only used if it exists.*/
-
-    /*Verify if 0, 1 and 2 is in the sequence*/
-    for (i = (SIZE - 3); i >= 0; i--) {
-        if (last_one < 0 && seq[i] == 1) {
-            last_one = i;
-        }
-        else if (last_two < 0 && seq[i] == 2) {
-            last_two = i;
-        }
-        else if (last_zero < 0 && seq[i] == 0) {
-            last_zero = i;
-        }
-    }
-    if (last_zero > -1) {
-        if ( last_one < 0 ) {
-            if ( last_two < 0 ) {                             /* First Case */
-                if ((seq[0] == 0) && (seq[1] == 0)) {
-                    /*printf("\tAPPROVED!!!!!!\n");*/
-                    /*NCodigos++;*/
-                    generate_tree(seq);
-                  /*          fprintf(f_cod, "[");
-                    for ( j = 0; j < SIZE-2; j++) {
-                        fprintf(f_cod,"%d %s", seq[j], j< SIZE-3 ? ",\0":"]\n");
-                    }*/
-                }
-                else {
-                    /*printf("\tREJECTED\n");*/
-                    return;
-                }
-            }
-            else {                                      /* Second Case */
-                /* Checks ...02... OR ...20... AND 0...*/
-                if (seq[0] == 0) {
-                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2) || (last_two != (SIZE-3) && seq[last_two + 1] == 0)) {
-                        /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
-                        generate_tree(seq);
-                      /*      fprintf(f_cod, "[");
-                        for ( j = 0; j < SIZE-2; j++) {
-                            fprintf(f_cod,"%d %s", seq[j], j< SIZE-3 ? ",\0":"]\n");
-                        }*/
-                    }
-                    else {
-                        /*printf("\tREJECTED\n");*/
-                        return;
-                    }
-                }
-                else {
-                    /*printf("\tREJECTED\n");*/
-                    return;
-                }
-            }
-        }
-        else {
-            if ( last_two < 0 ) {                             /* Third Case */
-                /* Checks ...01... OR ...10... AND 0...*/
-                if (seq[0] == 0) {
-                    if ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1) || (last_one != (SIZE-3) && seq[last_one + 1] == 0)) {
-                        /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
-                        generate_tree(seq);
-                     /*       fprintf(f_cod, "[");
-                        for ( j = 0; j < SIZE-2; j++) {
-                            fprintf(f_cod,"%d %s", seq[j], j< SIZE-3 ? ",\0":"]\n");
-                        }*/
-                    }
-                    else {
-                        /*printf("\tREJECTED\n");*/
-                        return;
-                    }
-                }
-                else {
-                    /*printf("\tREJECTED\n");*/
-                    return;
-                }
-            }
-            else {                                      /* Forth Case */
-                /* Checks ...10...02... OR ...20...01... */
-                if (((last_one != (SIZE-3) && seq[last_one + 1] == 0) && ((last_zero != (SIZE-3) && seq[last_zero + 1] == 2)||(last_two != (SIZE-3) && seq[last_two + 1] == 0))) || ((last_two != (SIZE-3) && seq[last_two + 1] == 0) && ((last_zero != (SIZE-3) && seq[last_zero + 1] == 1)||(last_one != (SIZE-3) && seq[last_one + 1] == 0)))) {
-                        /*printf("\tAPPROVED!!!!!!\n");*/
-                        /*NCodigos++;*/
-                        generate_tree(seq);
-                            /*fprintf(f_cod, "[");
-                        for ( j = 0; j < SIZE-2; j++) {
-                            fprintf(f_cod,"%d %s", seq[j], j< SIZE-3 ? ",\0":"]\n");
-                        }*/
-                    }
-                else {
-                    /*printf("\tREJECTED\n");*/
-                    return;
-                }
-            }
-        }
-    }
-    else {
-        /*printf("\tREJECTED\n");*/
-        return;
-    }
-}
