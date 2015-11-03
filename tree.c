@@ -13,18 +13,18 @@
 
 
 /* Data for the NN(7,4) codes*/
-#define N       7
+/*#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-/**/
+*/
 
 /* Data for the NN(15,11) codes*/
-/*#define N       15
+#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
 #define G      ((uint16_t ) 0x13)
-*/
+/**/
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -46,8 +46,8 @@ ele_t *lines[SIZE];
 uint16_t ZAux[SIZE] = {0};
 uint16_t Z[SIZE];
 
-/*unsigned long long int NCodigos = 0;*/
-int SCount = 0;
+unsigned long long int NCodigos = 0;
+/*int SCount = 0;*/
 
 /*int aaa = 0, bbb = 0, ccc = 0;*/
 
@@ -58,11 +58,12 @@ int SCount = 0;
 /******************************************************************/
 int main() {
 
-    int generated[SIZE-4];
+    /*int generated[SIZE-4];*/
     int i;
     int a = -1;
-    /*int j;
-    uint16_t c = 0, b, t;*/
+    int j;
+    uint16_t c = 0, b, t;
+    int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
@@ -75,23 +76,23 @@ int main() {
     lines[0][1] = lines[0][2] = 1;
     
     /*Generates array of words with each syndrome which have */
-    /*for (j = 0; j < N; j++) {*/
+    for (j = 0; j < N; j++) {
         /*creates the word and checks syndrome*/
-/*        b = c ^ (uint16_t)(1<<j);
-        t = syndrome(N, K, G, b);*/
-        
+        b = c ^ (uint16_t)(1<<j);
+        t = syndrome(N, K, G, b);
         /*printf("j : %d\t word : %d\t syndrome : %d \n", j, b, t);*/
         /*saves zero, records next_z*/
         /*printf("palavra: %d, sindrome: %d\n", b, t);*/
-  /*      ZAux[t] = b;
-    }*/
-    /*printf("ZAux: ");
-    for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" "); */
+        ZAux[t] = b;
+    }
+    
+    /*printf("ZAux: ");*/
+    for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");
     /*Generate Prüfer sequences*/
-    generate_seq(SIZE-4, generated);
-
-    /*printf("Número de códigos: %lld\n", NCodigos);*/
-    printf("numero de sequências: %d\n", SCount);
+    /*generate_seq(SIZE-4, generated);*/
+    generate_tree(teste);
+    printf("Número de códigos: %lld\n", NCodigos);
+    /*printf("numero de sequências: %d\n", SCount);*/
     /*fclose(f_seq);
     fclose(f_cod);*/
     return 0;
@@ -109,11 +110,11 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
     
     int i;
-    /*int j;*/ /*used for printing*/
+    int j; /*used for printing*/
     
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            /*if (i == 8) break;*/
+            if (i == 5) break;
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -125,11 +126,11 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-4-spaces] = i;
 
             /*Prints the current sequence values*/
-            /*for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
+            for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
 
-            /*printf("Will generate a new tree:\n");*/
+            printf("\n\n\nWill generate a new tree:\n\n\n");
 
-            SCount++;
+            /*SCount++;*/
             /*Generate tree associated to the sequence generated*/
             generate_tree(generated);
             /*break;*/
@@ -208,9 +209,9 @@ void recursive(int degree, int next_edge, int *edges) {
     else{
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
-            /*print_adj();*/
+            print_adj();
             /*NCodigos++;*/
-            /*generate_graph();*/
+            generate_graph();
             lines[i][edges[next_edge]] = 0;
         }
     }
@@ -240,6 +241,8 @@ void generate_graph() {
             }
             if (lines[k][i] == 1) {
                 count++;
+                
+                printf("i: %d | k : %d | next_z[k] : %d | lines[i][next_z[k]] : %d, Z[i] : %d, Z[k] : %d\n", i, k, next_z[k], lines[i][next_z[k]], Z[i], Z[k]);
                 Z[i] = Z[k]^ZAux[(k^i)];
                 next_z[next++] = i;
             }
@@ -268,19 +271,23 @@ void generate_graph() {
             }
             if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
                 count++;
-                /*Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];*/
+                printf("i: %d | k : %d | next_z[k] : %d | lines[i][next_z[k]] : %d, Z[i]\n", i, k, next_z[k], lines[i][next_z[k]]);
+                printf("Z[next_z[k]] : %d | ZAux[(next_z[k]^i)] : %d | Z[next_z[k]]^ZAux[(next_z[k]^i)] : %d\n\n", Z[next_z[k]], ZAux[(next_z[k]^i)], Z[next_z[k]]^ZAux[(next_z[k]^i)]);
+                Z[i] = Z[next_z[k]]^ZAux[(next_z[k]^i)];
                 next_z[next++] = i;
             }
         }
     }
     /*print Z*/
-    /*printf("Zero vector: \n");*/
     CUIDADO:
+    
+    NCodigos++;
+    printf("\n\nZero vector: \n");
     for (a = 0; a < SIZE; a++) {
-        /*printf("%d%c ", Z[a], a < N ? ',' : '\n');*/
+        printf("%d%c ", Z[a], a < N ? ',' : '\n');
         Z[a] = 0;
     }
-    /*printf("\n");*/
+    printf("\n");
 
 }
 
@@ -301,7 +308,7 @@ void print_adj() {
         for (j = i+1; j < (SIZE+1); j++) {
             sprintf(temp, "%s%2d%c ", temp, lines[i][j], j<(SIZE) ? ',' : ' ');
         }
-        printf("%32s\n", temp);
+        printf("%64s\n", temp);
     }
 }
 
