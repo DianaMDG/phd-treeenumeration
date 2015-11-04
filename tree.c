@@ -48,12 +48,11 @@ uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each synd
 uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation for the adj MAtrix*/
 uint16_t Z1[SIZE] = {0,1,2};             /*Zeros of the representation for the Adj List*/
 
-unsigned long long int NCodigos = 0;
-unsigned long long int NCodigos1 = 0;
+/*unsigned long long int NCodigos = 0;
+unsigned long long int NCodigos1 = 0;*/
 /*int                    SCount = 0;*/
-int contador1, contador2 = 0;
 
-FILE *f_matrix , *f_list;
+/*FILE *f_matrix , *f_list;*/
 
 
 /******************************************************************/
@@ -63,14 +62,14 @@ int main() {
 
     int generated[SIZE-4];
     int i;
-    int a = -1;
+    /*int a = -1;*/ /*used for adjacency case*/
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
     /*int teste[SIZE-4] = {8,8,8,8};*/
 
-    f_matrix = fopen("matrix_representations.txt", "w");
-    f_list = fopen("list_representations.txt", "w");
+    /*f_matrix = fopen("matrix_representations.txt", "w");
+    f_list = fopen("list_representations.txt", "w");*/
 
     /*set adjacency list to -1*/
     for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
@@ -78,11 +77,11 @@ int main() {
     }
     /*print_list();*/
     /*Generate adjacency matrix and respective lines pointer array*/
-    for (i=0; i < SIZE; i++) {
+    /*for (i=0; i < SIZE; i++) {
         lines[i] = adjacency + a;
-        a += SIZE - i - 1; /*a += SIZE - 2 - i;*/
+        a += SIZE - i - 1;
     }
-    lines[0][1] = lines[0][2] = 1;
+    lines[0][1] = lines[0][2] = 1;*/
     
     /*Generates array of words with each syndrome which have */
     for (j = 0; j < N; j++) {
@@ -102,11 +101,11 @@ int main() {
     generate_seq(SIZE-4, generated);
     /*generate_tree(teste);*/
     
-    printf("Número de códigos: %lld e %lld (%d e %d)\n", NCodigos, NCodigos1, contador1, contador2);
+    /*printf("Número de códigos: %lld e %lld \n", NCodigos, NCodigos1);*/
     /*printf("numero de sequências: %d\n", SCount);*/
 
-    fclose(f_matrix);
-    fclose(f_list);
+    /*fclose(f_matrix);
+    fclose(f_list);*/
 
     return 0;
 }
@@ -123,7 +122,7 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
 
     int i;
-    int j; /*used for printing*/
+    /*int j;*/ /*used for printing*/
 
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
@@ -154,10 +153,11 @@ void generate_seq(int spaces, int *generated) {
 /*Function that generates trees from Prüfer sequences WITH SUPER NODE*/
 void generate_tree(int *seq){
     /*NOTE: The decodig algorithm implemented in this functions runs in O(n), as is explained in Wang et al; "An Optimal Algorithm for Prüfer Codes" J. Software Engineering & Applications, 2009, 2 (111-115)*/
-    int i, j, k = 0;
+    int i, j;
+    /*int k = 0; *//*used for the Matrix case*/
     int degree[SIZE-2];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
-    int edgesSuperNode[SIZE-3] = {0}; /*values from 3 to N*/
+    /*int edgesSuperNode[SIZE-3] = {0}; *//*values from 3 to N*/
     /*variables to the adjacency list*/
     int a, b;
     /*int next[SIZE-3] = {SIZE};*/
@@ -195,7 +195,7 @@ void generate_tree(int *seq){
         /*print_list();*/
 
         /*Adjacency Matrix*/
-        lines[min(x, y)][max(x, y)] = TREE;
+        /*lines[min(x, y)][max(x, y)] = TREE;*/
 
         degree[y-3] -= 1;
         if ((y < index) && (degree[y-3] == 1)) {
@@ -227,7 +227,7 @@ void generate_tree(int *seq){
     print_list();*/
 
     /*Adjacency Matrix*/
-    lines[min(x, y)][max(x, y)] = TREE;
+    /*lines[min(x, y)][max(x, y)] = TREE;*/
 
     /*Delete repeated nodes in Adjacency list*/
     for (i = 0; (i < SIZE) && ((a = list[SIZE][i]) > -1); i++) {
@@ -236,11 +236,11 @@ void generate_tree(int *seq){
     }
 
     /*check edges connecting to SUPER NODE */
-    for (i = 3, j = 0; i < SIZE; i++) {
+    /*for (i = 3, j = 0; i < SIZE; i++) {
         if (lines[i][SIZE] == TREE) {
             edgesSuperNode[k++] = i;
         }
-    }
+    }*/
     /*printf("\nMatrix with super nodes\n");*/
     /*print_adj();*/
     /*print_list();*/
@@ -248,15 +248,15 @@ void generate_tree(int *seq){
     /*Generates trees from combinations of edges to super nodes*/
     /*Adjacency Matrix*/
     /*printf("MATRIZ : degree super no: %d\n", k);*/
-    recursive(k, 0, edgesSuperNode);
+    /*recursive(k, 0, edgesSuperNode);*/
 
     /*Adjacency List*/
     /*printf("LISTA : degree super no: %d\n", list_index[SIZE]);*/
     recursive_list(0);
 
     /*Clear Adjacency Matrix*/
-    clear_adj();
-    
+    /*clear_adj();*/
+
     /*Clear Adjacency List*/
     clear_list();
 }
@@ -297,8 +297,8 @@ void recursive_list(int index) {
             list[i][list_index[i]++] = list[SIZE][index];
             /*printf("newly generated adjcency list : \n");*/
             /*print_list();*/
-            NCodigos1++;
-            generate_graph_list();
+            /*NCodigos1++;*/
+            /*generate_graph_list();*/
             list[i][--list_index[i]] = 0;
         }
     }
@@ -318,7 +318,7 @@ void recursive(int degree, int next_edge, int *edges) {
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
             /*print_adj();*/
-            NCodigos++;
+            /*NCodigos++;*/
             generate_graph();
             lines[i][edges[next_edge]] = 0;
         }
@@ -334,7 +334,7 @@ void generate_graph(void) {
 
     int i, k;
     int a;
-    int j; /*used for printing*/
+    /*int j;*/ /*used for printing*/
     int next = 1; /*next zero to be set*/
     int count = 1; /* number of zeros defined*/
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
@@ -395,9 +395,7 @@ void generate_graph(void) {
     /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n");*/
 
     /*print to file*/
-    for ( j = 0; j < SIZE; j++) {
-        fprintf(f_matrix,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n");
-    }
+    /*for ( j = 0; j < SIZE; j++) { fprintf(f_matrix,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }*/
 
     /*clear Z*/
     for (a = 3; a < SIZE; a++) {
@@ -409,11 +407,9 @@ void generate_graph(void) {
 }
 
 void generate_graph_list(void) {
-    int j;
+    /*int j;*/ /*used for printing*/
     check_node(0);
-    for ( j = 0; j < SIZE; j++) {
-        fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z1[j], j< SIZE-1 ? ",\0":"]\n");
-    }
+    /*for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z1[j], j< SIZE-1 ? ",\0":"]\n"); }*/
 }
 
 /*Function that attributes zeros to the nodes, in a depth search*/
