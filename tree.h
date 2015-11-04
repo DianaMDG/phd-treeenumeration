@@ -19,11 +19,7 @@ void generate_seq(int spaces, int *generated);
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq);
 
-/*Function that prints the adjacency matrix of a given tree*/
-void print_adj(void);
 
-/*Function that clears an adjacency matrix */
-void clear_adj(void);
 
 /*Function that prints the adjacency list*/
 void print_list(void);
@@ -42,7 +38,4 @@ void verify_node(int node);
 
 /*Function used to generate combinations of connections to super node*/
 void recursive_list(int index);
-
-/*Function used to generate combinations of connections to super node for building the adjacency matrix*/
-void recursive(int degree, int next_edge, int *edges);
 

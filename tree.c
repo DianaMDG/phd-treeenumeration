@@ -13,18 +13,18 @@
 
 
 /* Data for the NN(7,4) codes*/
-#define N       7
+/*#define N       7
 #define SIZE    (N+1)
 #define K       (N-3)
 #define G      ((uint16_t ) 0xb )
-
+*/
 
 /* Data for the NN(15,11) codes*/
-/*#define N       15
+#define N       15
 #define SIZE    (N+1)
 #define K       (N-4)
 #define G      ((uint16_t ) 0x13)
-*/
+
 
 #define TREE    1
 #define GRAPH   (1<<1)
@@ -38,8 +38,8 @@ typedef char bool;
 #define true 1
 #define false 0
 
-ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
-ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
+/*ele_t adjacency[(SIZE+1)*(SIZE)/2];*/     /*Triangular Adjacency matrix*/
+/*ele_t *lines[SIZE];                */     /*Array of indexes to access the adjacency matrix*/
 
 int list[SIZE+1][SIZE-1] = {{1,2}};         /*Adjacency list*/
 int list_index [SIZE+1] = {2};            /*indexes to access the current list index of a given node*/
@@ -75,11 +75,11 @@ int main() {
     }
     /*print_list();*/
     /*Generate adjacency matrix and respective lines pointer array*/
-    for (i=0; i < SIZE; i++) {
+    /*for (i=0; i < SIZE; i++) {
         lines[i] = adjacency + a;
-        a += SIZE - i - 1; /*a += SIZE - 2 - i;*/
-    }
-    lines[0][1] = lines[0][2] = 1;
+        a += SIZE - i - 1; *//*a += SIZE - 2 - i;*/
+    /*}
+    lines[0][1] = lines[0][2] = 1;*/
     
     /*Generates array of words with each syndrome which have */
     for (j = 0; j < N; j++) {
@@ -136,9 +136,9 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-4-spaces] = i;
 
             /*Prints the current sequence values*/
-            for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+            /*for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
 
-            printf("\n\n\nWill generate a new tree:\n\n\n");
+            /*printf("\n\n\nWill generate a new tree:\n\n\n");*/
 
             /*SCount++;*/
             /*Generate tree associated to the sequence generated*/
@@ -154,7 +154,7 @@ void generate_tree(int *seq){
     int i, j;
     int degree[SIZE-2];
     int index = 0, x = 0, y; /*auxiliary variable to the linear time decoding of the Prüfer sequence */
-    int edgesSuperNode[SIZE-3] = {0}; /*values from 3 to N*/
+    /*int edgesSuperNode[SIZE-3] = {0};*/ /*values from 3 to N*/
     /*variables to the adjacency list*/
     int a, b;
 /*    int next[SIZE-3] = {SIZE};
@@ -201,7 +201,7 @@ void generate_tree(int *seq){
         }
         /*print_list();*/
         /*Adjacency Matrix*/
-        lines[min(x, y)][max(x, y)] = TREE;
+        /*lines[min(x, y)][max(x, y)] = TREE;*/
 
         degree[y-3] -= 1;
         if ((y < index) && (degree[y-3] == 1)) {
@@ -233,8 +233,8 @@ void generate_tree(int *seq){
         list[y][list_index[y]++] = x;
     }
 
-    printf("Adj List temporary: \n");
-    print_list();
+    /*printf("Adj List temporary: \n");
+    print_list();*/
 
     /*Adjacency Matrix*/
     /*lines[min(x, y)][max(x, y)] = TREE;*/
@@ -251,9 +251,9 @@ void generate_tree(int *seq){
             edgesSuperNode[j++] = i;
         }
     }*/
-    printf("\nMatrix with super nodes\n");
+    /*printf("\nMatrix with super nodes\n");*/
     /*print_adj();*/
-    print_list();
+    /*print_list();*/
 
     /*Generates trees from combinations of edges to super nodes*/
     /*Adjacency Matrix*/
@@ -312,27 +312,6 @@ void recursive_list(int index) {
     }
 }
 
-/*Function used to generate combinations of connections to super node for building the adjacency matrix*/
-void recursive(int degree, int next_edge, int *edges) {
-    int i;
-    if (degree > 1) {
-        for (i = 0; i < 3; i++) {
-            lines[i][edges[next_edge]] = 1;
-            recursive(degree - 1, next_edge + 1, edges);
-            lines[i][edges[next_edge]] = 0;
-        }
-    }
-    else{
-        for (i = 0; i < 3; i++) {
-            lines[i][edges[next_edge]] = 1;
-            /*print_adj();*/
-            /*NCodigos++;*/
-            generate_graph();
-            lines[i][edges[next_edge]] = 0;
-        }
-    }
-}
-
 /*Function that generates the neutral network graph from the tree*/
 void generate_graph(void) {
     /*NOTE: This function populates the Zeros array of the neutral neutwork and calculates the graph's edges*/
@@ -348,7 +327,7 @@ void generate_graph(void) {
     uint16_t next_z[SIZE] = {0, 1, 2};
 
     /*for the first known elements of the sequence: 0, 1, 2*/
-    for (k = 0; k<3; k++) {
+    /*for (k = 0; k<3; k++) {
         if (count == SIZE) {
             goto CUIDADO;
         }
@@ -362,7 +341,7 @@ void generate_graph(void) {
                 next_z[next++] = i;
             }
         }
-    }
+    }*/
 
     /*for each element of next_z, all besides 0, 1, 2*/
     for (k = 0 ; k < SIZE - 3; k++) {
@@ -374,22 +353,22 @@ void generate_graph(void) {
             if (count == SIZE) {
                 goto CUIDADO;
             }
-            if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
+           /* if (lines[next_z[k]][i] == 1 && Z[i] == 0) {
                 count++;
                 Z[i] = Z[next_z[k]] ^ ZAux[(next_z[k]^i)];
                 next_z[next++]=i;
-            }
+            }*/
         }
         /*and columns*/
         for (i = 3; i < next_z[k]; i++){ /*start in 3 because 1st iterations are with z = 0, 1, 2, and there is no need to repeat*/
             if (count == SIZE) {
                 goto CUIDADO;
             }
-            if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
+            /*if (lines[i][next_z[k]] == 1 && Z[i] == 0) {
                 count++;
                 Z[i] = Z[next_z[k]] ^ ZAux[(next_z[k]^i)];
                 next_z[next++] = i;
-            }
+            }*/
         }
     }
 
@@ -424,33 +403,6 @@ void print_list(void) {
         printf("\n");
 }
 
-/*Function that prints the adjacency matrix of a given tree*/
-void print_adj(void) {
-    /*NOTE: Print adjacency matrix using array of pointers lines, and alligned to right.*/ 
-    /*WARNING: Size of strings is hard coded.*/
-
-    int i, j;
-
-    /*Print using adjacency matrix by lines*/
-    printf("Adjacency matrix:\n");
-    char temp[128];
-    for (i=0; i < (SIZE); i++) {
-        temp[0] = '\0';
-        for (j = i+1; j < (SIZE+1); j++) {
-            sprintf(temp, "%s%2d%c ", temp, lines[i][j], j<(SIZE) ? ',' : ' ');
-        }
-        printf("%64s\n", temp);
-    }
-}
-
-/*Function that clears an adjacency matrix BUT THE (0,1) and (0,2) edges*/
-void clear_adj(void) {
-    /*NOTE: sets all values to 0*/
-    int i;
-    for (i=2; i < (SIZE)*(SIZE+1)/2; i++) {
-        adjacency[i] = 0;
-    }
-}
 
 /*Function that clears an adjacency list BUT THE (0,1) and (0,2) edges*/
 void clear_list(void) {
