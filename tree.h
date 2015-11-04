@@ -25,6 +25,9 @@ void print_adj(void);
 /*Function that clears an adjacency matrix */
 void clear_adj(void);
 
+/*Function that prints the adjacency list*/
+void print_list();
+
 /*Function that generates the neutral network graph from the tree*/
 void generate_graph(void);
 
