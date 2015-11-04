@@ -47,7 +47,7 @@ int list_index [SIZE+1] = {2};            /*indexes to access the current list i
 uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
 uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
 
-/*unsigned long long int NCodigos = 0;*/
+unsigned long long int NCodigos = 0;
 /*int                    SCount = 0;*/
 
 /*FILE *f_seq , *f_cod;*/
@@ -58,13 +58,13 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
 /******************************************************************/
 int main() {
 
-    /*int generated[SIZE-4];*/
+    int generated[SIZE-4];
     int i;
     int a = -1;
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
-    int teste[SIZE-4] = {3,3,3,3};
+    /*int teste[SIZE-4] = {6,7,8,8};*/
     
     /*f_seq = fopen("seq_edges.txt", "w");
     f_cod = fopen("cod_cortes.txt", "w");*/
@@ -96,10 +96,10 @@ int main() {
     /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
     
     /*Generate Prüfer sequences*/
-    /*generate_seq(SIZE-4, generated);*/
-    generate_tree(teste);
+    generate_seq(SIZE-4, generated);
+    /*generate_tree(teste);*/
     
-    /*printf("Número de códigos: %lld\n", NCodigos);*/
+    printf("Número de códigos: %lld\n", NCodigos);
     /*printf("numero de sequências: %d\n", SCount);*/
 
     /*fclose(f_seq);
@@ -120,11 +120,11 @@ void generate_seq(int spaces, int *generated) {
     /* NOTE: because the sequences are not saved, it is reused, and so, filled sequencially*/
 
     int i;
-    /*int j;*/ /*used for printing*/
+    int j; /*used for printing*/
 
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            if (i == 7) break;
+            /*if (i == 7) break;*/
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -136,9 +136,9 @@ void generate_seq(int spaces, int *generated) {
             generated[SIZE-4-spaces] = i;
 
             /*Prints the current sequence values*/
-            /*for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+            for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
 
-            printf("\n\n\nWill generate a new tree:\n\n\n");*/
+            printf("\n\n\nWill generate a new tree:\n\n\n");
 
             /*SCount++;*/
             /*Generate tree associated to the sequence generated*/
@@ -237,35 +237,39 @@ void generate_tree(int *seq){
     print_list();
 
     /*Adjacency Matrix*/
-    lines[min(x, y)][max(x, y)] = TREE;
+    /*lines[min(x, y)][max(x, y)] = TREE;*/
 
     /*Delete repeated nodes in Adjacency list*/
     for (i = 0; (i < SIZE) && ((a = list[SIZE][i]) > -1); i++) {
-        printf("a : %d\n", a);
+        /*printf("a : %d\n", a);*/
         verify_node(a);
     }
 
     /*check edges connecting to SUPER NODE */
-    for (i = 3, j = 0; i < SIZE; i++) {
+    /*for (i = 3, j = 0; i < SIZE; i++) {
         if (lines[i][SIZE] == TREE) {
             edgesSuperNode[j++] = i;
         }
-    }
+    }*/
     printf("\nMatrix with super nodes\n");
     /*print_adj();*/
     print_list();
 
     /*Generates trees from combinations of edges to super nodes*/
     /*Adjacency Matrix*/
-    recursive(j, 0, edgesSuperNode);
+    /*recursive(j, 0, edgesSuperNode);*/
 
     /*Adjacency List*/
     recursive_list(0);
-    /*Clear Adj matrix*/
-    clear_adj();
+
+    /*Clear Adjacency Matrix*/
+    /*clear_adj();*/
+    
+    /*Clear Adjacency List*/
+    clear_list();
 }
 
-/*Function used to delete repeated */
+/*Function used to delete repeated in adjacency list*/
 void verify_node(int node) {
     /*NOTE: For every other node connected to the given node, which is nearest the root, it deletes the extra edge (connecting from leaf to root) and sends every other node to be checked too.*/
 
@@ -299,9 +303,9 @@ void recursive_list(int index) {
     else{ /*if the next one is the last*/
         for (i = 0; i < 3; i++) {
             list[i][list_index[i]++] = list[SIZE][index];
-            printf("newly generated adjcency list : \n");
-            print_list();
-            /*NCodigos++;*/
+            /*printf("newly generated adjcency list : \n");*/
+            /*print_list();*/
+            NCodigos++;
             /*generate_graph();*/
             list[i][--list_index[i]] = 0;
         }
@@ -405,7 +409,7 @@ void generate_graph(void) {
 }
 
 /*Function that prints the adjacency list*/
-void print_list() {
+void print_list(void) {
     /*NOTE: */
     int i, j;
     
@@ -448,3 +452,18 @@ void clear_adj(void) {
     }
 }
 
+/*Function that clears an adjacency list BUT THE (0,1) and (0,2) edges*/
+void clear_list(void) {
+    int i;
+
+    /*Clear Adjacancy List*/
+    for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
+        list[0][i] = -1;
+    }
+
+    /*Reset the information of the list indexes*/
+    list_index[0] = 2;
+    for (i = 1; i < SIZE + 1;i++) {
+        list_index[i] = 0;
+    }
+}
