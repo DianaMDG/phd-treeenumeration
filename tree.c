@@ -42,7 +42,7 @@ ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
 ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
 
 int list[SIZE+1][SIZE-1] = {{1,2}};         /*Adjacency list*/
-int list_index [SIZE+1] = {0};            /*indexes to access the current list index of a given node*/
+int list_index [SIZE+1] = {2};            /*indexes to access the current list index of a given node*/
 
 uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
 uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
@@ -218,6 +218,7 @@ void generate_tree(int *seq){
     }
     y = SIZE;
     /*print_list();*/
+
     /*Adjacency List*/
     if ((a = max(x, y)) == SIZE) {
         b = min(x,y);
@@ -235,7 +236,7 @@ void generate_tree(int *seq){
     printf("Adj List temporary: \n");
     print_list();
 
-    /*Adjacency List*/
+    /*Adjacency Matrix*/
     lines[min(x, y)][max(x, y)] = TREE;
 
     /*Delete repeated nodes in Adjacency list*/
@@ -253,8 +254,13 @@ void generate_tree(int *seq){
     printf("\nMatrix with super nodes\n");
     /*print_adj();*/
     print_list();
+
+    /*Generates trees from combinations of edges to super nodes*/
+    /*Adjacency Matrix*/
     recursive(j, 0, edgesSuperNode);
 
+    /*Adjacency List*/
+    recursive_list(0);
     /*Clear Adj matrix*/
     clear_adj();
 }
@@ -281,6 +287,28 @@ void verify_node(int node) {
 }
 
 /*Function used to generate combinations of connections to super node*/
+void recursive_list(int index) {
+    int i;
+    if (list[SIZE][index+1] > -1) { /*if the next one is not the last*/
+        for (i = 0; i < 3; i++) {
+            list[i][list_index[i]++] = list[SIZE][index];
+            recursive_list(index + 1);
+            list[i][--list_index[i]] = 0;
+        }
+    }
+    else{ /*if the next one is the last*/
+        for (i = 0; i < 3; i++) {
+            list[i][list_index[i]++] = list[SIZE][index];
+            printf("newly generated adjcency list : \n");
+            print_list();
+            /*NCodigos++;*/
+            /*generate_graph();*/
+            list[i][--list_index[i]] = 0;
+        }
+    }
+}
+
+/*Function used to generate combinations of connections to super node for building the adjacency matrix*/
 void recursive(int degree, int next_edge, int *edges) {
     int i;
     if (degree > 1) {
@@ -295,28 +323,10 @@ void recursive(int degree, int next_edge, int *edges) {
             lines[i][edges[next_edge]] = 1;
             /*print_adj();*/
             /*NCodigos++;*/
-/*            build_list();*/
             generate_graph();
             lines[i][edges[next_edge]] = 0;
         }
     }
-}
-
-void build_list(void) {
-    /*NOTE: Function that builds the adjacency list*/
-    /*edges (0,1) and (0,2) already set to 1, initialization with declaration*/
-    
-    int i;
-/*    int count = 0;*/
-    int next = 2;
-    
-    /*Check edges connecting to 0 (zero)*/
-    for (i = 1; i < SIZE; i++) {
-        if (lines[0][i] == 1) {
-            list[0][next++] = i;
-        }
-    }
-    /*for ()*/
 }
 
 /*Function that generates the neutral network graph from the tree*/

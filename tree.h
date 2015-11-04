@@ -37,6 +37,8 @@ void generate_graph(void);
 void verify_node(int node);
 
 /*Function used to generate combinations of connections to super node*/
+void recursive_list(int index);
+
+/*Function used to generate combinations of connections to super node for building the adjacency matrix*/
 void recursive(int degree, int next_edge, int *edges);
 
-void build_list(void);
