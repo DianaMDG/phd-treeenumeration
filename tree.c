@@ -93,7 +93,7 @@ int main() {
     }
     
     /*printf("ZAux: ");*/
-    /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAUX : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
+    /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAux : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
     
     /*Generate Prüfer sequences*/
     generate_seq(SIZE-4, generated);
@@ -124,7 +124,7 @@ void generate_seq(int spaces, int *generated) {
 
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            /*if (i == 7) break;*/
+            if (i == 5) break;
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -182,24 +182,15 @@ void generate_tree(int *seq){
 
         /*Adjacency List*/
         if ((a = max(x, y)) == SIZE) {
-            /*printf("found Super No\n");*/
             b = min(x,y);
-            /*printf("list index before: %d", list_index[a]);*/
             list[a][list_index[a]++] = b;
-            /*printf("list index after: %d", list_index[a]);*/
-            /*next[index_next++] = b;*/ /*não é preciso, i guess..*/
         }
         else {
-            /*printf("found No\n");
-            printf("list index %d before: %d\n", x,list_index[x]);
-            printf("list index %d before: %d\n", y, list_index[y]);*/
             list[x][list_index[x]++] = y;
             list[y][list_index[y]++] = x;
-            /*printf("list index %d after: %d\n", x, list_index[x]);
-            printf("list index %d after: %d\n", y, list_index[y]);
-            printf("added value: %d\n", list[y][list_index[y]-1]);*/
         }
         /*print_list();*/
+
         /*Adjacency Matrix*/
         /*lines[min(x, y)][max(x, y)] = TREE;*/
 
@@ -222,13 +213,9 @@ void generate_tree(int *seq){
     /*Adjacency List*/
     if ((a = max(x, y)) == SIZE) {
         b = min(x,y);
-        /*printf("found FANTASTIC Super No | a : %d, b : %d\n", a, b);
-            printf("list index %d before: %d\n", a, list_index[a]);*/
         list[a][list_index[a]++] = b;
-        /*next[index_next++] = b;*/
     }
     else {
-        /*printf("found No\n");*/
         list[x][list_index[x]++] = y;
         list[y][list_index[y]++] = x;
     }
@@ -324,8 +311,9 @@ void generate_graph(void) {
     int next = 1; /*next zero to be set*/
     int count = 1; /* number of zeros defined*/
     /*uint16_t t_s, t_w; *//*temporary syndrome and word*/
-    uint16_t next_z[SIZE] = {0, 1, 2};
-
+    /*uint16_t next_z[SIZE] = {0, 1, 2};*/
+    
+    
     /*for the first known elements of the sequence: 0, 1, 2*/
     /*for (k = 0; k<3; k++) {
         if (count == SIZE) {
@@ -385,6 +373,20 @@ void generate_graph(void) {
     }
     /*printf("\n");*/
 
+}
+
+/*Function that attributes zeros to the nodes, in a depth search*/
+void check_node(int node) {
+    int i;
+    int a;
+
+    for(i = 0; i < list_index[node]; i++) {
+        a = list[node][i];
+        if (a != 0) {
+            Z[a] = Z[node] ^ ZAux[node ^ a];
+            check_node(a);
+        }
+    }
 }
 
 /*Function that prints the adjacency list*/

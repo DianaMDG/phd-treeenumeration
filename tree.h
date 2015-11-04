@@ -33,6 +33,9 @@ void generate_graph(void);
 /*Function that verifies if the sequance is valid or not*/
 /*void check_seq(int *seq);*/
 
+/*Function that attributes zeros to the nodes, in a depth search*/
+void check_node(int node);
+
 /*Function used to delete repeated in adjacency list*/
 void verify_node(int node);
 
