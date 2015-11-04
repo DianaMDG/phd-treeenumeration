@@ -19,8 +19,6 @@ void generate_seq(int spaces, int *generated);
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq);
 
-
-
 /*Function that prints the adjacency list*/
 void print_list(void);
 
@@ -29,6 +27,8 @@ void clear_list(void);
 
 /*Function that generates the neutral network graph from the tree*/
 void generate_graph(void);
+
+void generate_graph_list(void);
 
 /*Function that verifies if the sequance is valid or not*/
 /*void check_seq(int *seq);*/
@@ -41,4 +41,13 @@ void verify_node(int node);
 
 /*Function used to generate combinations of connections to super node*/
 void recursive_list(int index);
+
+/*Function used to generate combinations of connections to super node for building the adjacency matrix*/
+void recursive(int degree, int next_edge, int *edges);
+
+/*Function that prints the adjacency matrix of a given tree*/
+void print_adj(void);
+
+/*Function that clears an adjacency matrix */
+void clear_adj(void);
 
