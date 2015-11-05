@@ -20,6 +20,9 @@ void generate_tree(int *seq);
 *                    Functions for the Adjacency List
 *************************************************************************/
 
+/*Function used to generate combinations of connections to super node, recursively*/
+void unfold_SN_list_recursive(int index);
+
 /*Function used to generate combinations of connections to super node*/
 void unfold_SN_list(int index);
 

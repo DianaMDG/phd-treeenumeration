@@ -298,7 +298,7 @@ void generate_tree(int *seq){
         print_list();*/
 
         /*Generates trees from combinations of edges to super nodes*/
-        unfold_SN_list(0);
+        unfold_SN_list_recursive(0);
 
         /*Clear Adjacency List*/
         clear_list();
@@ -312,13 +312,13 @@ void generate_tree(int *seq){
 *************************************************************************/
 
 
-/*Function used to generate combinations of connections to super node*/
-void unfold_SN_list(int index) {
+/*Function used to generate combinations of connections to super node, recursively*/
+void unfold_SN_list_recursive(int index) {
     int i;
     if (index <= list_index[SIZE]-2) { /*if the next one is not the last*/
         for (i = 0; i < 3; i++) {
             list[i][list_index[i]++] = list[SIZE][index];
-            unfold_SN_list(index + 1);
+            unfold_SN_list_recursive(index + 1);
             list[i][--list_index[i]] = 0;
         }
     }
@@ -335,6 +335,14 @@ void unfold_SN_list(int index) {
             #endif
             list[i][--list_index[i]] = 0;
         }
+    }
+}
+
+/*Function used to generate combinations of connections to super node*/
+void unfold_SN_list() {
+    int i;
+    for (i = 0; i < list_index[SIZE]; i++) {
+        
     }
 }
 
@@ -361,7 +369,7 @@ void generate_graph_list(void) {
             }
         }
     }
-    
+
     apply_prim_list();
     /*for ( j = 0; j < SIZE+1; j++) { printf("%s %d %s",  j==0?"parent = [":"", parent[j], j< SIZE ? ",\0":"]\n"); }*/
     #ifdef tofile
@@ -376,7 +384,7 @@ void generate_graph_list(void) {
 
 /*Function that checks if the tree of a given representation is its minnimum spanning tree*/
 void apply_prim_list(void){
-    
+    /*TODO*/
 }
 
 /*Function that prints the adjacency list*/
