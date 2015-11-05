@@ -6,7 +6,7 @@
 #include"neutral_rep.h"
 
 /*#define matriz      0*/
-/*#define verbose     0*/
+/*#define NUMBERS     0*/
 /*#define tofile      0*/
 /*#define graph       1*/
 
@@ -16,8 +16,8 @@
     #pragma message "USING LIST"
 #endif
 
-#ifdef verbose
-    #pragma message "verbosing"
+#ifdef NUMBERS
+    #pragma message "counting"
 #endif
 
 #ifdef tofile
@@ -34,22 +34,23 @@
 /* K    : Number of information bits*/
 /* G    : Generator polynomial for the codes */
 
+/*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
+#define N 15
 
-/* Data for the NN(7,4) codes*/
-/*#define N       7
-#define SIZE    (N+1)
-#define K       (N-3)
-#define G      ((uint16_t ) 0xb )
-*/
-
-/* Data for the NN(15,11) codes*/
-#define N       15
-#define SIZE    (N+1)
-#define K       (N-4)
-#define G      ((uint16_t ) 0x13)
-/**/
-
-#define TREE    1
+#if N == 7
+    /* Data for the NN(7,4) codes*/
+    #define SIZE    (N+1)
+    #define K       (N-3)
+    #define G       ((uint16_t ) 0xb )
+#elif N == 15
+    /* Data for the NN(15,11) codes*/
+    #define SIZE    (N+1)
+    #define K       (N-4)
+    #define G       ((uint16_t ) 0x13)
+    #define CORTE   7
+#else
+    #pragma message "PLEASE CHOOSE VALUE OF N FROM {7, 15}"
+#endif
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -57,19 +58,20 @@
 #ifdef matriz
     ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
     ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
+    #define TREE    1
 #else
     int list[SIZE+1][SIZE-1] = {{1,2}};         /*Adjacency list*/
     int list_index [SIZE+1] = {2};            /*indexes to access the current list index of a given node*/
+    int parent[SIZE] = {-1,0,0};
 #endif
 
-uint16_t ZAux[SIZE] = {0};              /*Auxiliar Array of Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
-uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation for the adj MAtrix*/
-uint16_t Z1[SIZE] = {0,1,2};             /*Zeros of the representation for the Adj List*/
+uint16_t ZAux[SIZE] = {0};              /*Auxiliar Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
+uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
 
-#ifdef verbose
-    unsigned long long int NCodigos = 0;
-    unsigned long long int NCodigos1 = 0;
-    int                    SCount = 0;
+#ifdef NUMBERS
+    unsigned long long int CCount = 0;    /*Number of generated codes*/
+    unsigned long long int CCount1 = 0;   /*Number of something*/
+    unsigned long      int SCount = 0;    /*Number of generated Sequences*/
 #endif
 
 #ifdef tofile
@@ -94,7 +96,7 @@ int main() {
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
-    /*int teste[SIZE-4] = {8,8,8,8};*/
+    /*int teste[SIZE-4] = {3,3,3,8};*/
 
     #ifdef tofile
         #ifdef matriz
@@ -137,9 +139,9 @@ int main() {
     generate_seq(SIZE-4, generated);
     /*generate_tree(teste);*/
 
-    #ifdef verbose
-        printf("Número de códigos: %lld e %lld \n", NCodigos, NCodigos1);
-        printf("numero de sequências: %d\n", SCount);
+    #ifdef NUMBERS
+        printf("Número de códigos: %lld e %lld \n", CCount, CCount1);
+        printf("numero de sequências: %ld\n", SCount);
     #endif
 
     #ifdef tofile
@@ -168,7 +170,9 @@ void generate_seq(int spaces, int *generated) {
 
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
-            if (i == 5) break;
+            #if N == 15
+                if (i == CORTE) break;
+            #endif
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -184,7 +188,7 @@ void generate_seq(int spaces, int *generated) {
 
             /*printf("\n\n\nWill generate a new tree:\n\n\n");*/
 
-            #ifdef verbose
+            #ifdef NUMBERS
                 SCount++;
             #endif
 
@@ -292,27 +296,118 @@ void generate_tree(int *seq){
         /*printf("Adj List temporary: \n");
         print_list();*/
 
-        /*Delete repeated nodes*/
-        for (i = 0; (i < SIZE) && ((a = list[SIZE][i]) > -1); i++) {
-            verify_node(a);
-        }
-
-        /*print_list();*/
-
         /*Generates trees from combinations of edges to super nodes*/
-        recursive_list(0);
+        unfold_SN_list(0);
 
         /*Clear Adjacency List*/
         clear_list();
+        
     #endif
 }
 
+
+#ifndef matriz
+/*************************************************************************
+*                    Functions for the Adjacency List
+*************************************************************************/
+
+
+/*Function used to generate combinations of connections to super node*/
+void unfold_SN_list(int index) {
+    int i;
+    if (index <= list_index[SIZE]-2) { /*if the next one is not the last*/
+        for (i = 0; i < 3; i++) {
+            list[i][list_index[i]++] = list[SIZE][index];
+            unfold_SN_list(index + 1);
+            list[i][--list_index[i]] = 0;
+        }
+    }
+    else{ /*if the next one is the last*/
+        for (i = 0; i < 3; i++) {
+            list[i][list_index[i]++] = list[SIZE][index];
+            /*printf("newly generated adjcency list : \n");*/
+            /*print_list();*/
+            #ifdef NUMBERS
+                CCount1++;
+            #endif
+            #ifdef graph
+                generate_graph_list();
+            #endif
+            list[i][--list_index[i]] = 0;
+        }
+    }
+}
+
+/*Function that generates the calculates the representation for a given tree*/
+void generate_graph_list(void) {
+    int i, j;
+    int mask[SIZE] = {0};
+    int next_node[SIZE] = {0};
+    int next_index = 1;         /*already has 0 in it*/
+    int a, b;
+
+    for (i = 0; i < SIZE; i++) {
+        a = next_node[i]; /*next node to be avaluated */
+        for (j = 0; j < list_index[a]; j++) {
+            b = list[a][j]; /*son of a*/
+            if (!mask [b]) {
+                mask[b] ^= 1;
+                next_node[next_index++] = b;
+                 Z[b] = Z[a] ^ ZAux[a ^ b];
+            }
+        }
+    }
+
+    #ifdef tofile
+        for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
+    #endif
+
+    /*clear Z*/
+    for (i = 3; i < SIZE; i++) {
+        Z[i] = 0;
+    }
+}
+
+/*Function that prints the adjacency list*/
+void print_list(void) {
+    /*NOTE: */
+    int i, j;
+
+    printf("Adjacency list: \n");
+    for (i = 0; i < SIZE+1; i++) {
+        printf("%d :  ", i);
+        for (j = 0; j < list_index[i] ; j++) {
+            printf("%d, ", list[i][j] );
+        }
+        printf("\b\b  \n");
+    }
+        printf("\n");
+}
+
+
+/*Function that clears an adjacency list BUT THE (0,1) and (0,2) edges*/
+void clear_list(void) {
+    /*NOTE: Clears list by reseting the list_indexes*/
+    int i;
+
+    /*Clear Adjacancy List*/
+    /*for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
+        list[0][i] = -1;
+    }*/
+
+    /*Reset the information of the list indexes*/
+    list_index[0] = 2;
+    for (i = 1; i < SIZE + 1;i++) {
+        list_index[i] = 0;
+    }
+}
+
+#else
 
 /*************************************************************************
 *                    Functions for the Adjacency Matrix
 *************************************************************************/
 
-#ifdef matriz
 /*Function used to generate combinations of connections to super node for building the adjacency matrix*/
 void recursive(int degree, int next_edge, int *edges) {
     int i;
@@ -327,8 +422,8 @@ void recursive(int degree, int next_edge, int *edges) {
         for (i = 0; i < 3; i++) {
             lines[i][edges[next_edge]] = 1;
             /*print_adj();*/
-            #ifdef verbose
-                NCodigos++;
+            #ifdef NUMBERS
+                CCount++;
             #endif
             #ifdef graph
                 generate_graph();
@@ -438,121 +533,5 @@ void clear_adj(void) {
     }
 }
 
-#else
-/*************************************************************************
-*                    Functions for the Adjacency List
-*************************************************************************/
-
-/*Function used to delete repeated in adjacency list*/
-void verify_node(int node) {
-#pragma message "USING LIST"
-    /*NOTE: For every other node connected to the given node, which is nearest the root, it deletes the extra edge (connecting from leaf to root) and sends every other node to be checked too.*/
-
-    int i, j;
-    int b;
-
-    /*for every node connecting to node*/
-    for (i = 0; (i < SIZE) &&((b = list[node][i]) > -1)  ; i++ ) {
-        /*checks the information about the edge in the node farthest from the root*/
-        for (j = 0 ; (j < SIZE) && (list[b][j] > -1) ; j++) {
-            if (list[b][j] == node) {
-                /*found the edge that was looking for*/
-                list[b][j] = 0;
-                break;
-            }
-        }
-        verify_node(b);
-    }
-}
-
-/*Function used to generate combinations of connections to super node*/
-void recursive_list(int index) {
-    int i;
-    if (list[SIZE][index+1] > -1) { /*if the next one is not the last*/
-        for (i = 0; i < 3; i++) {
-            list[i][list_index[i]++] = list[SIZE][index];
-            recursive_list(index + 1);
-            list[i][--list_index[i]] = 0;
-        }
-    }
-    else{ /*if the next one is the last*/
-        for (i = 0; i < 3; i++) {
-            list[i][list_index[i]++] = list[SIZE][index];
-            /*printf("newly generated adjcency list : \n");*/
-            /*print_list();*/
-            #ifdef verbose
-                NCodigos1++;
-            #endif
-            #ifdef graph
-                generate_graph_list();
-            #endif
-            list[i][--list_index[i]] = 0;
-        }
-    }
-}
-
-/*Function that generates the calculates the representation for a given tree*/
-void generate_graph_list(void) {
-    /*int j;*/ /*used for printing*/
-    check_node(0);
-
-    #ifdef tofile
-        int j;
-        for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z1[j], j< SIZE-1 ? ",\0":"]\n"); }
-    #endif
-
-    /*clear Z*/
-    int a;
-    for (a = 3; a < SIZE; a++) {
-        Z1[a] = 0;
-    }
-}
-
-/*Function that attributes zeros to the nodes, in a depth search*/
-void check_node(int node) {
-    int i;
-    int a;
-
-    for(i = 0; i < list_index[node]; i++) {
-        a = list[node][i]; /*nós filhos do nó node*/
-        if (a != 0) {
-            Z1[a] = Z1[node] ^ ZAux[node ^ a];
-            check_node(a);
-        }
-    }
-}
-
-/*Function that prints the adjacency list*/
-void print_list(void) {
-    /*NOTE: */
-    int i, j;
-
-    printf("Adjacency list: \n");
-    for (i = 0; i < SIZE+1; i++) {
-        printf("%d :  ", i);
-        for (j = 0;  (j < SIZE) && (list[i][j] > -1); j++) {
-            printf("%d, ", list[i][j] );
-        }
-        printf("\b\b  \n");
-    }
-        printf("\n");
-}
-
-
-/*Function that clears an adjacency list BUT THE (0,1) and (0,2) edges*/
-void clear_list(void) {
-    int i;
-
-    /*Clear Adjacancy List*/
-    for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
-        list[0][i] = -1;
-    }
-
-    /*Reset the information of the list indexes*/
-    list_index[0] = 2;
-    for (i = 1; i < SIZE + 1;i++) {
-        list_index[i] = 0;
-    }
-}
-
 #endif
+
