@@ -32,6 +32,10 @@ void print_list(void);
 /*Function that clears an adjacency list BUT THE (0,1) and (0,2) edges*/
 void clear_list(void);
 
+/*Function that checks if the tree of a given representation is its minnimum spanning tree*/
+void apply_prim_list(void);
+
+
 #else
 /*************************************************************************
 *                    Functions for the Adjacency Matrix

@@ -35,7 +35,7 @@
 /* G    : Generator polynomial for the codes */
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N 15
+#define N 7
 
 #if N == 7
     /* Data for the NN(7,4) codes*/
@@ -173,6 +173,7 @@ void generate_seq(int spaces, int *generated) {
             #if N == 15
                 if (i == CORTE) break;
             #endif
+            if (i == 4) break;
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -208,8 +209,8 @@ void generate_tree(int *seq){
     #ifdef matriz
         int k = 0;
         int edgesSuperNode[SIZE-3] = {0}; /*values from 3 to N*/
-    #else
-        int a, b;
+    /*#else
+        int a, b;*/
     #endif
 
     /*1st step - degree array construction*/
@@ -237,14 +238,14 @@ void generate_tree(int *seq){
             lines[min(x, y)][max(x, y)] = TREE;
         #else
             /*Adjacency List*/
-            if ((a = max(x, y)) == SIZE) {
+            /*if ((a = max(x, y)) == SIZE) {
                 b = min(x,y);
                 list[a][list_index[a]++] = b;
             }
-            else {
+            else {*/
                 list[x][list_index[x]++] = y;
                 list[y][list_index[y]++] = x;
-            }
+            /*}*/
 
             /*print_list();*/
         #endif
@@ -284,14 +285,14 @@ void generate_tree(int *seq){
         clear_adj();
     #else
         /*Adjacency List*/
-        if ((a = max(x, y)) == SIZE) {
+        /*if ((a = max(x, y)) == SIZE) {
             b = min(x,y);
             list[a][list_index[a]++] = b;
         }
-        else {
+        else {*/
             list[x][list_index[x]++] = y;
             list[y][list_index[y]++] = x;
-        }
+        /*}*/
 
         /*printf("Adj List temporary: \n");
         print_list();*/
@@ -301,7 +302,6 @@ void generate_tree(int *seq){
 
         /*Clear Adjacency List*/
         clear_list();
-        
     #endif
 }
 
@@ -340,12 +340,15 @@ void unfold_SN_list(int index) {
 
 /*Function that generates the calculates the representation for a given tree*/
 void generate_graph_list(void) {
+    /*NOTE: The first 3 elements of the mask array are never read, because the unfolding of the super node does not add 2 edges. Only from {0,1,2} to the rest*/
+
     int i, j;
-    int mask[SIZE] = {0};
+    int mask[SIZE+1] = {0};
     int next_node[SIZE] = {0};
     int next_index = 1;         /*already has 0 in it*/
     int a, b;
 
+    mask[SIZE] = 1;
     for (i = 0; i < SIZE; i++) {
         a = next_node[i]; /*next node to be avaluated */
         for (j = 0; j < list_index[a]; j++) {
@@ -353,11 +356,14 @@ void generate_graph_list(void) {
             if (!mask [b]) {
                 mask[b] ^= 1;
                 next_node[next_index++] = b;
-                 Z[b] = Z[a] ^ ZAux[a ^ b];
+                Z[b] = Z[a] ^ ZAux[a ^ b];
+                parent[b] = a;
             }
         }
     }
-
+    
+    apply_prim_list();
+    /*for ( j = 0; j < SIZE+1; j++) { printf("%s %d %s",  j==0?"parent = [":"", parent[j], j< SIZE ? ",\0":"]\n"); }*/
     #ifdef tofile
         for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
     #endif
@@ -366,6 +372,11 @@ void generate_graph_list(void) {
     for (i = 3; i < SIZE; i++) {
         Z[i] = 0;
     }
+}
+
+/*Function that checks if the tree of a given representation is its minnimum spanning tree*/
+void apply_prim_list(void){
+    
 }
 
 /*Function that prints the adjacency list*/
