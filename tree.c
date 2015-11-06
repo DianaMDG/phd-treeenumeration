@@ -35,7 +35,7 @@
 /* G    : Generator polynomial for the codes */
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N 7
+#define N 15
 
 #if N == 7
     /* Data for the NN(7,4) codes*/
@@ -47,7 +47,10 @@
     #define SIZE    (N+1)
     #define K       (N-4)
     #define G       ((uint16_t ) 0x13)
-    #define CORTE   7
+    /*#define CORTE   28672*/
+    /*#define CORTE   2480058*/
+    /*#define CORTE   58720256*/
+    #define CORTE   683593750
 #else
     #pragma message "PLEASE CHOOSE VALUE OF N FROM {7, 15}"
 #endif
@@ -136,7 +139,8 @@ int main() {
     /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAux : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
 
     /*Generate Prüfer sequences*/
-    generate_seq(SIZE-4, generated);
+    /*generate_seq(SIZE-4, generated);*/
+    generate_seq_iteratively(generated);
     /*generate_tree(teste);*/
 
     #ifdef NUMBERS
@@ -197,6 +201,42 @@ void generate_seq(int spaces, int *generated) {
             generate_tree(generated);
             /*break;*/
         }
+    }
+}
+
+/*Iterative function that generates the Prüfer sequences that will generate the trees WITH THE SUPER NODE*/
+void generate_seq_iteratively(int *generated) {
+    int i, j;
+    int div, res;
+    int base = SIZE - 2;
+    int index;
+
+    #if N == 15
+        for (i = 0; i < CORTE; i++) {
+    #else
+        for (i = 0; i < pow((SIZE-2), (SIZE-4)); i++) {
+    #endif
+        index = 0;
+        div = i / base;
+        res = i % base;
+        generated [index++] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
+        while (div != 0 || res != 0) {
+            res = div % base;
+            div = div / base;
+            generated [index++] = res + 3; /*again, 3 ... */
+        }
+        /*just in case some missed*/
+        for (j = index; j < (SIZE - 4); j++) {
+            generated [j] = 3; /*again, 3 ... */
+        }
+        #ifdef NUMBERS
+            SCount++;
+        #endif
+
+        /*int j; for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
+
+        /*Generate tree associated to the sequence generated*/
+        generate_tree(generated);
     }
 }
 
@@ -339,7 +379,7 @@ void unfold_SN_list_recursive(int index) {
 }
 
 /*Function used to generate combinations of connections to super node*/
-void unfold_SN_list() {
+void unfold_SN_list(int index) {
     int i;
     for (i = 0; i < list_index[SIZE]; i++) {
         
