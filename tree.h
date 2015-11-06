@@ -11,6 +11,9 @@ typedef char ele_t;
 /*Recursive function that generates the Prüfer sequences that will generate the trees*/
 void generate_seq(int spaces, int *generated);
 
+/*Iterative function that generates the Prüfer sequences that will generate the trees WITH THE SUPER NODE*/
+void generate_seq_iteratively(int *generated);
+
 /*Function that generates trees from Prüfer sequences */
 void generate_tree(int *seq);
 
