@@ -94,7 +94,7 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
         #endif
     #endif
 #endif
-
+FILE *f_teste;
 
 /******************************************************************/
 /************************   MAIN   ********************************/
@@ -128,7 +128,7 @@ int main() {
             #endif
         #endif
     #endif
-
+f_teste = fopen("teste.txt","w");
     #ifdef matriz
         /*Generate adjacency matrix and respective lines pointer array*/
         for (i=0; i < SIZE; i++) {
@@ -158,16 +158,16 @@ int main() {
     /*for(j = 1; j < SIZE; j++)  printf("%s %d %s", j==1 ? "ZAux : ":"", ZAux[j], j ==SIZE -1?"\n":" ");*/
 
     /*Generate Prüfer sequences*/
-    /*generate_seq(SIZE-4, generated);*/
+    generate_seq(SIZE-4, generated);
     /*generate_seq_iteratively(generated);*/
-    generate_tree(teste);
+    /*generate_tree(teste);*/
 
     #ifdef NUMBERS
         printf("Número de códigos: %lld e %lld \n", CCount, CCount1);
         printf("numero de sequências: %ld\n", SCount);
         #ifndef matriz
             #ifdef graph
-                printf("Número de cortes : %d | Número de códigos resultantes : %d", CCuts, Finals);
+                printf("Número de cortes : %d | Número de códigos resultantes : %d\n", CCuts, Finals);
             #endif
         #endif
     #endif
@@ -183,7 +183,7 @@ int main() {
             #endif
         #endif
     #endif
-
+fclose(f_teste);
     return 0;
 }
 
@@ -317,7 +317,7 @@ void generate_tree(int *seq){
                 list[a][list_index[a]++] = b;
             }
             else {*/
-                list[x][list_index[x]++] = y;
+                /*list[x][list_index[x]++] = y;*/
                 list[y][list_index[y]++] = x;
             /*}*/
 
@@ -364,7 +364,7 @@ void generate_tree(int *seq){
             list[a][list_index[a]++] = b;
         }
         else {*/
-            list[x][list_index[x]++] = y;
+            /*list[x][list_index[x]++] = y;*/
             list[y][list_index[y]++] = x;
         /*}*/
 
@@ -372,9 +372,20 @@ void generate_tree(int *seq){
         print_list();*/
 
         /*Generates trees from combinations of edges to super nodes*/
-        unfold_SN_list_recursive(0);
+        /*unfold_SN_list_recursive(0);*/
         /*unfold_SN_list();*/
 
+        fprintf(f_teste, "Adjacency list: \n");
+        for (i = 0; i < SIZE+1; i++) {
+            fprintf(f_teste, "%d :  ", i);
+            for (j = 0; j < list_index[i] ; j++) {
+                fprintf(f_teste, "%d, ", list[i][j] );
+            }
+            fprintf(f_teste, "\b\b  \n");
+        }
+        fprintf(f_teste, "\n");
+        
+        
         /*Clear Adjacency List*/
         clear_list();
     #endif
@@ -481,7 +492,7 @@ void generate_graph_list(void) {
             }
             fprintf(f_list, "\b\b  \n");
         }
-        printf("\n");*/
+        fprintf(f_list, "\n");*/
         for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
     #endif
 
@@ -496,28 +507,20 @@ void apply_prim_list(void){
     /*TODO*/
     int i, j, k;
     int next_node[SIZE] = {0}, index = 1;
-    int success = 0;
     int mask[SIZE] = {1};
     int l;
 
     for (i = 0; i < SIZE; i++) {
-        /*next_node[i]*/
-        /*printf("NOVO nó : %d\n", next_node[i]);*/
         for (j = 0; j < SIZE; j++) {
-            /*printf("outro nó : %d | d = %d\n", j, __builtin_popcount(Z[next_node[i]]^Z[j]));*/
             if (!mask[j] && __builtin_popcount(Z[next_node[i]]^Z[j]) == 1) {
-                /*printf("\tentrou!\t\tcom i = %d | j = %d\n", next_node[i], j);
-                printf("debug: mask[%d] = %d\n",j, mask[j]);*/
                 next_node[index++] = j;
                 mask[j] = 1;
-                /*for (l = 0; l < SIZE; l++) printf ("%s %d %s",  l==0?"mask = [":"", mask[l], l< SIZE-1 ? ",\0":"]\n");*/
 
-                for (k = 0; k < list_index[next_node[i]]; k++) {
-                    /*printf("list[%d][%d] = %d\t", next_node[i], k, list[next_node[i]][k]);*/
+                /*for (k = 0; k < list_index[next_node[i]]; k++) {
                     if (list[next_node[i]][k] == j) {success = 1; }
-                } /*printf("\n");*/
-                if (!success) {
-                    /*printf("\t\tCORTOU!!!!!!\n\n\n");*/
+                }*/
+                /*if parent of j is not next_node[i]*/
+                if (parent[j] != next_node[i]) {
                     #ifdef tofile
                         for (l = 0; l < SIZE; l ++) fprintf(f_cut, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
                     #endif
@@ -526,7 +529,6 @@ void apply_prim_list(void){
                     #endif
                     return;
                 }
-                else {success=0; }
             }
         }
     }
