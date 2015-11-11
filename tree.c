@@ -35,7 +35,8 @@
 /* G    : Generator polynomial for the codes */
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N 15
+#define N 7
+#define LEVEL 2
 
 #if N == 7
     /* Data for the NN(7,4) codes*/
@@ -47,16 +48,16 @@
     #define SIZE    (N+1)
     #define K       (N-4)
     #define G       ((uint16_t ) 0x13)
-    /*#define CORTE   28672*/
-    /*#define CORTE   2480058*/
-    /*#define CORTE   58720256*/
-    #define CORTE   683593750
+    #define CORTE   corte[LEVEL]
+    int corte[4] = {28672, 2480058, 58720256, 683593750};
 #else
     #pragma message "PLEASE CHOOSE VALUE OF N FROM {7, 15}"
 #endif
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
+
+
 
 #ifdef matriz
     ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
@@ -75,6 +76,12 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
     unsigned long long int CCount = 0;    /*Number of generated codes*/
     unsigned long long int CCount1 = 0;   /*Number of something*/
     unsigned long      int SCount = 0;    /*Number of generated Sequences*/
+    #ifndef matriz
+        #ifdef graph
+            int CCuts = 0;
+            int Finals = 0;
+        #endif
+    #endif
 #endif
 
 #ifdef tofile
@@ -82,16 +89,26 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
         FILE *f_matrix;
     #else
         FILE *f_list;
+        #ifdef graph
+            FILE *f_cut, *f_pass;
+        #endif
     #endif
 #endif
+
 
 /******************************************************************/
 /************************   MAIN   ********************************/
 /******************************************************************/
+int powb3[13];
 int main() {
 
     int generated[SIZE-4];
     int i;
+
+    for (i = 0; i < 13; i++) {
+        powb3[i] = pow(3, i);
+    }
+
     #ifdef matriz
         int a = -1;
     #else
@@ -99,16 +116,18 @@ int main() {
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
-    /*int teste[SIZE-4] = {3,3,3,8};*/
+    int teste[SIZE-4] = {7,5,3,8};
 
     #ifdef tofile
         #ifdef matriz
             f_matrix = fopen("matrix_representations.txt", "w");
         #else
             f_list = fopen("list_representations.txt", "w");
+            #ifdef graph
+                f_cut = fopen("cut.txt", "w"); f_pass = fopen("pass.txt", "w");
+            #endif
         #endif
     #endif
-
 
     #ifdef matriz
         /*Generate adjacency matrix and respective lines pointer array*/
@@ -140,12 +159,17 @@ int main() {
 
     /*Generate Prüfer sequences*/
     /*generate_seq(SIZE-4, generated);*/
-    generate_seq_iteratively(generated);
-    /*generate_tree(teste);*/
+    /*generate_seq_iteratively(generated);*/
+    generate_tree(teste);
 
     #ifdef NUMBERS
         printf("Número de códigos: %lld e %lld \n", CCount, CCount1);
         printf("numero de sequências: %ld\n", SCount);
+        #ifndef matriz
+            #ifdef graph
+                printf("Número de cortes : %d | Número de códigos resultantes : %d", CCuts, Finals);
+            #endif
+        #endif
     #endif
 
     #ifdef tofile
@@ -153,6 +177,10 @@ int main() {
             fclose(f_matrix);
         #else
             fclose(f_list);
+            #ifdef graph
+                fclose(f_cut);
+                fclose(f_pass);
+            #endif
         #endif
     #endif
 
@@ -175,9 +203,9 @@ void generate_seq(int spaces, int *generated) {
     if (spaces > 1) {
         for( i = 3; i < (SIZE)+1; i++) {
             #if N == 15
-                if (i == CORTE) break;
+                if (i == LEVEL + 5) break;
             #endif
-            if (i == 4) break;
+            /*if (i == 4) break;*/
             generated[SIZE-4-spaces] = i; /*i because values go from 0 to n and i goes from 0 to n */
             generate_seq (spaces-1, generated);
             /*break;*/
@@ -200,6 +228,9 @@ void generate_seq(int spaces, int *generated) {
             /*Generate tree associated to the sequence generated*/
             generate_tree(generated);
             /*break;*/
+            #ifdef tofile
+                int j; for ( j = 0; j < SIZE-4; j++) fprintf(f_list, "%s%d %s",  j==0?"[":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+            #endif
         }
     }
 }
@@ -209,32 +240,35 @@ void generate_seq_iteratively(int *generated) {
     int i, j;
     int div, res;
     int base = SIZE - 2;
-    int index;
+    /*int index;*/
 
     #if N == 15
         for (i = 0; i < CORTE; i++) {
     #else
         for (i = 0; i < pow((SIZE-2), (SIZE-4)); i++) {
     #endif
-        index = 0;
+        /*index = 0;*/
         div = i / base;
         res = i % base;
-        generated [index++] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
-        while (div != 0 || res != 0) {
+        generated [SIZE-5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
+        for (j = SIZE-6 ; j > 1; j--) {
+        /*while (div != 0 || res != 0) {*/
             res = div % base;
             div = div / base;
-            generated [index++] = res + 3; /*again, 3 ... */
+            generated [j] = res + 3; /*again, 3 ... */
         }
         /*just in case some missed*/
-        for (j = index; j < (SIZE - 4); j++) {
-            generated [j] = 3; /*again, 3 ... */
-        }
+        /*for (j = index; j < (SIZE - 4); j++) {
+            generated [j] = 3;*/ /*again, 3 ... */
+        /*}*/
         #ifdef NUMBERS
             SCount++;
         #endif
 
         /*int j; for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
-
+        #ifdef tofile
+            int j; for ( j = 0; j < SIZE-4; j++) fprintf(f_list, "%s%d %s",  j==0?"[":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+        #endif
         /*Generate tree associated to the sequence generated*/
         generate_tree(generated);
     }
@@ -339,6 +373,7 @@ void generate_tree(int *seq){
 
         /*Generates trees from combinations of edges to super nodes*/
         unfold_SN_list_recursive(0);
+        /*unfold_SN_list();*/
 
         /*Clear Adjacency List*/
         clear_list();
@@ -350,7 +385,6 @@ void generate_tree(int *seq){
 /*************************************************************************
 *                    Functions for the Adjacency List
 *************************************************************************/
-
 
 /*Function used to generate combinations of connections to super node, recursively*/
 void unfold_SN_list_recursive(int index) {
@@ -365,10 +399,10 @@ void unfold_SN_list_recursive(int index) {
     else{ /*if the next one is the last*/
         for (i = 0; i < 3; i++) {
             list[i][list_index[i]++] = list[SIZE][index];
-            /*printf("newly generated adjcency list : \n");*/
+            /*printf("newly generated adjacency list : \n");*/
             /*print_list();*/
             #ifdef NUMBERS
-                CCount1++;
+                CCount++;
             #endif
             #ifdef graph
                 generate_graph_list();
@@ -379,14 +413,40 @@ void unfold_SN_list_recursive(int index) {
 }
 
 /*Function used to generate combinations of connections to super node*/
-void unfold_SN_list(int index) {
-    int i;
-    for (i = 0; i < list_index[SIZE]; i++) {
-        
+static void unfold_SN_list(void) {
+    int i = powb3[list_index[SIZE]], j;
+    int div, res;
+    int index; /*index do no ligado ao super no*/
+    /*int nodes[3] = {list_index[0], list_index[1], list_index[2]};*/
+
+    /*for (i = 0; i < powb3[list_index[SIZE]]; i++) {*/
+    while (i--) {
+        index = 0;                  /*restarting from the first node*/
+
+        /*div = i / base;
+        res = i % base;
+        list[res][list_index[res]++] = list[SIZE][index++];*/   /*3 comes from shifting the nodes not in the Super Node*/
+        /*while (div != 0 || res != 0) {*/
+        for (j = 0, div = i; j < list_index[SIZE]; j++) {
+            res = div % 3;
+            div = div / 3;
+            list[res][list_index[res]++] = list[SIZE][index++];
+        }
+        /**/
+        #ifdef NUMBERS
+            CCount++;
+        #endif
+        #ifdef graph
+            generate_graph_list();
+        #endif
+
+        list_index[0] = 2;   /*reseting the list indexes*/
+        list_index[1] = 0;
+        list_index[2] = 0;
     }
 }
 
-/*Function that generates the calculates the representation for a given tree*/
+/*Function that generates the representation for a given tree*/
 void generate_graph_list(void) {
     /*NOTE: The first 3 elements of the mask array are never read, because the unfolding of the super node does not add 2 edges. Only from {0,1,2} to the rest*/
 
@@ -409,10 +469,19 @@ void generate_graph_list(void) {
             }
         }
     }
-
+    /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n\n");*/
     apply_prim_list();
     /*for ( j = 0; j < SIZE+1; j++) { printf("%s %d %s",  j==0?"parent = [":"", parent[j], j< SIZE ? ",\0":"]\n"); }*/
     #ifdef tofile
+        /*fprintf(f_list, "Adjacency list: \n");
+        for (i = 0; i < SIZE+1; i++) {
+            fprintf(f_list, "%d :  ", i);
+            for (j = 0; j < list_index[i] ; j++) {
+                fprintf(f_list, "%d, ", list[i][j] );
+            }
+            fprintf(f_list, "\b\b  \n");
+        }
+        printf("\n");*/
         for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
     #endif
 
@@ -425,7 +494,69 @@ void generate_graph_list(void) {
 /*Function that checks if the tree of a given representation is its minnimum spanning tree*/
 void apply_prim_list(void){
     /*TODO*/
+    int i, j, k;
+    int next_node[SIZE] = {0}, index = 1;
+    int success = 0;
+    int mask[SIZE] = {1};
+    int l;
+
+    for (i = 0; i < SIZE; i++) {
+        /*next_node[i]*/
+        /*printf("NOVO nó : %d\n", next_node[i]);*/
+        for (j = 0; j < SIZE; j++) {
+            /*printf("outro nó : %d | d = %d\n", j, __builtin_popcount(Z[next_node[i]]^Z[j]));*/
+            if (!mask[j] && __builtin_popcount(Z[next_node[i]]^Z[j]) == 1) {
+                /*printf("\tentrou!\t\tcom i = %d | j = %d\n", next_node[i], j);
+                printf("debug: mask[%d] = %d\n",j, mask[j]);*/
+                next_node[index++] = j;
+                mask[j] = 1;
+                /*for (l = 0; l < SIZE; l++) printf ("%s %d %s",  l==0?"mask = [":"", mask[l], l< SIZE-1 ? ",\0":"]\n");*/
+
+                for (k = 0; k < list_index[next_node[i]]; k++) {
+                    /*printf("list[%d][%d] = %d\t", next_node[i], k, list[next_node[i]][k]);*/
+                    if (list[next_node[i]][k] == j) {success = 1; }
+                } /*printf("\n");*/
+                if (!success) {
+                    /*printf("\t\tCORTOU!!!!!!\n\n\n");*/
+                    #ifdef tofile
+                        for (l = 0; l < SIZE; l ++) fprintf(f_cut, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
+                    #endif
+                    #ifdef NUMBERS
+                        CCuts++;
+                    #endif
+                    return;
+                }
+                else {success=0; }
+            }
+        }
+    }
+    
+    #ifdef tofile
+        for (l = 0; l < SIZE; l ++) fprintf(f_pass, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
+    #endif
+    #ifdef NUMBERS
+        Finals++;
+    #endif
+
 }
+
+/*int popcount(int a) {
+    int b0, b1, c, d0, d2, e, f0, f4, g, h0, h8, i;
+
+    b0 = (a >> 0) & 01 01 01 01 01 01 01 01;
+    b1 = (a >> 1) & 01 01 01 01 01 01 01 01;
+    c = b0 + b1;
+    d0 = (c >> 0) & 0011 0011 0011 0011;
+    d2 = (c >> 2) & 0011 0011 0011 0011;
+    e = d0 + d4;
+    f0 = (e >> 0) & 00001111 00001111;
+    f4 = (e >> 4) & 00001111 00001111;
+    g = f0 + f4;
+    h0 = (g >> 0) & 0000000011111111
+    h8 = (g >> 8) & 0000000011111111
+    i = h0 + h8;
+    return i;
+}*/
 
 /*Function that prints the adjacency list*/
 void print_list(void) {
@@ -440,7 +571,7 @@ void print_list(void) {
         }
         printf("\b\b  \n");
     }
-        printf("\n");
+    printf("\n");
 }
 
 

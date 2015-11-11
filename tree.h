@@ -27,9 +27,9 @@ void generate_tree(int *seq);
 void unfold_SN_list_recursive(int index);
 
 /*Function used to generate combinations of connections to super node*/
-void unfold_SN_list(int index);
+static void unfold_SN_list(void);
 
-/*Function that generates the calculates the representation for a given tree*/
+/*Function that generates the representation for a given tree*/
 void generate_graph_list(void);
 
 /*Function that prints the adjacency list*/
