@@ -9,6 +9,7 @@
 /*#define NUMBERS     0*/
 /*#define tofile      0*/
 /*#define graph       1*/
+/*#define prim        0*/
 
 #ifdef matriz
     #pragma message "USING MATRIX"
@@ -28,6 +29,10 @@
     #pragma message "generating representations"
 #endif
 
+#ifdef prim
+    #pragma message "calculating minimum spanning tree using Prim algorithm"
+#endif
+
 /*NOTE*/
 /* N    : Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 /* SIZE : Number of syndromes, number of nodes in the tree*/
@@ -35,7 +40,7 @@
 /* G    : Generator polynomial for the codes */
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N 7
+#define N 15
 #define LEVEL 2
 
 #if N == 7
@@ -76,12 +81,8 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
     unsigned long long int CCount = 0;    /*Number of generated codes*/
     unsigned long long int CCount1 = 0;   /*Number of something*/
     unsigned long      int SCount = 0;    /*Number of generated Sequences*/
-    #ifndef matriz
-        #ifdef graph
-            int CCuts = 0;
-            int Finals = 0;
-        #endif
-    #endif
+    int CCuts = 0;
+    int Finals = 0;
 #endif
 
 #ifdef tofile
@@ -319,6 +320,7 @@ void generate_tree(int *seq){
             else {*/
                 /*list[x][list_index[x]++] = y;*/
                 list[y][list_index[y]++] = x;
+                parent[x] = y;
             /*}*/
 
             /*print_list();*/
@@ -366,16 +368,17 @@ void generate_tree(int *seq){
         else {*/
             /*list[x][list_index[x]++] = y;*/
             list[y][list_index[y]++] = x;
+            parent[x] = y;
         /*}*/
 
         /*printf("Adj List temporary: \n");
         print_list();*/
 
         /*Generates trees from combinations of edges to super nodes*/
-        /*unfold_SN_list_recursive(0);*/
+        unfold_SN_list_recursive(0);
         /*unfold_SN_list();*/
 
-        fprintf(f_teste, "Adjacency list: \n");
+        /*fprintf(f_teste, "Adjacency list: \n");
         for (i = 0; i < SIZE+1; i++) {
             fprintf(f_teste, "%d :  ", i);
             for (j = 0; j < list_index[i] ; j++) {
@@ -383,7 +386,7 @@ void generate_tree(int *seq){
             }
             fprintf(f_teste, "\b\b  \n");
         }
-        fprintf(f_teste, "\n");
+        fprintf(f_teste, "\n");*/
         
         
         /*Clear Adjacency List*/
@@ -399,10 +402,11 @@ void generate_tree(int *seq){
 
 /*Function used to generate combinations of connections to super node, recursively*/
 void unfold_SN_list_recursive(int index) {
-    int i;
+    int i, j;
     if (index <= list_index[SIZE]-2) { /*if the next one is not the last*/
         for (i = 0; i < 3; i++) {
             list[i][list_index[i]++] = list[SIZE][index];
+            parent[list[SIZE][index]] = i;
             unfold_SN_list_recursive(index + 1);
             list[i][--list_index[i]] = 0;
         }
@@ -410,8 +414,10 @@ void unfold_SN_list_recursive(int index) {
     else{ /*if the next one is the last*/
         for (i = 0; i < 3; i++) {
             list[i][list_index[i]++] = list[SIZE][index];
+            parent[list[SIZE][index]] = i;
             /*printf("newly generated adjacency list : \n");*/
             /*print_list();*/
+        /*for (j = 0; j < SIZE; j++) printf ("%s %d %s",  j==0?"Z = [":"", parent[j], j< SIZE-1 ? ",\0":"]\n");*/
             #ifdef NUMBERS
                 CCount++;
             #endif
@@ -462,26 +468,30 @@ void generate_graph_list(void) {
     /*NOTE: The first 3 elements of the mask array are never read, because the unfolding of the super node does not add 2 edges. Only from {0,1,2} to the rest*/
 
     int i, j;
-    int mask[SIZE+1] = {0};
+/*    int mask[SIZE+1] = {0};*/
     int next_node[SIZE] = {0};
     int next_index = 1;         /*already has 0 in it*/
     int a, b;
 
-    mask[SIZE] = 1;
+    /*mask[SIZE] = 1;*/
     for (i = 0; i < SIZE; i++) {
-        a = next_node[i]; /*next node to be avaluated */
+        a = next_node[i]; /*next node to be evaluated */
         for (j = 0; j < list_index[a]; j++) {
             b = list[a][j]; /*son of a*/
-            if (!mask [b]) {
-                mask[b] ^= 1;
+            /*if (!mask [b]) {
+                mask[b] ^= 1;*/
                 next_node[next_index++] = b;
                 Z[b] = Z[a] ^ ZAux[a ^ b];
-                parent[b] = a;
-            }
+                /*parent[b] = a;*/
+            /*}*/
         }
     }
+    /*for (j = 0; j < SIZE; j++) printf ("%s %d %s",  j==0?"Z = [":"", parent[j], j< SIZE-1 ? ",\0":"]\n\n\n");*/
     /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n\n");*/
-    apply_prim_list();
+    #ifdef prim
+        printf("Aqui!!");
+        apply_prim_list();
+    #endif
     /*for ( j = 0; j < SIZE+1; j++) { printf("%s %d %s",  j==0?"parent = [":"", parent[j], j< SIZE ? ",\0":"]\n"); }*/
     #ifdef tofile
         /*fprintf(f_list, "Adjacency list: \n");
@@ -510,6 +520,7 @@ void apply_prim_list(void){
     int mask[SIZE] = {1};
     int l;
 
+    printf("\n");
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
             if (!mask[j] && __builtin_popcount(Z[next_node[i]]^Z[j]) == 1) {
