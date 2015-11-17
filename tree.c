@@ -139,9 +139,9 @@ f_teste = fopen("teste.txt","w");
         lines[0][1] = lines[0][2] = 1;
     #else
         /*set adjacency list to -1*/
-        for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
+        /*for (i = 2; i < (SIZE+1)*(SIZE-1); i++) {
             list[0][i] = -1;
-        }
+        }*/
     #endif
 
     /*Generates array of words with each syndrome which have */
@@ -489,7 +489,6 @@ void generate_graph_list(void) {
     /*for (j = 0; j < SIZE; j++) printf ("%s %d %s",  j==0?"Z = [":"", parent[j], j< SIZE-1 ? ",\0":"]\n\n\n");*/
     /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n\n");*/
     #ifdef prim
-        printf("Aqui!!");
         apply_prim_list();
     #endif
     /*for ( j = 0; j < SIZE+1; j++) { printf("%s %d %s",  j==0?"parent = [":"", parent[j], j< SIZE ? ",\0":"]\n"); }*/
@@ -520,7 +519,6 @@ void apply_prim_list(void){
     int mask[SIZE] = {1};
     int l;
 
-    printf("\n");
     for (i = 0; i < SIZE; i++) {
         for (j = 0; j < SIZE; j++) {
             if (!mask[j] && __builtin_popcount(Z[next_node[i]]^Z[j]) == 1) {
