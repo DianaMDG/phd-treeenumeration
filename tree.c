@@ -10,6 +10,7 @@
 /*#define tofile      0*/
 /*#define graph       1*/
 /*#define prim        0*/
+/*#define CONSTANTS   0*/
 
 #ifdef matriz
     #pragma message "USING MATRIX"
@@ -33,6 +34,10 @@
     #pragma message "calculating minimum spanning tree using Prim algorithm"
 #endif
 
+#ifdef CONSTANTS
+    #pragma message "Verifying if is minimal regarding constants"
+#endif
+
 /*NOTE*/
 /* N    : Number of bis used by the representation, N used in the neutral network NN(n,k)*/
 /* SIZE : Number of syndromes, number of nodes in the tree*/
@@ -40,7 +45,7 @@
 /* G    : Generator polynomial for the codes */
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N 15
+#define N 7
 #define LEVEL 2
 
 #if N == 7
@@ -83,6 +88,8 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
     unsigned long      int SCount = 0;    /*Number of generated Sequences*/
     int CCuts = 0;
     int Finals = 0;
+    int CCutsConst = 0;
+    int FinalsConst = 0;
 #endif
 
 #ifdef tofile
@@ -168,7 +175,10 @@ f_teste = fopen("teste.txt","w");
         printf("numero de sequências: %ld\n", SCount);
         #ifndef matriz
             #ifdef graph
-                printf("Número de cortes : %d | Número de códigos resultantes : %d\n", CCuts, Finals);
+                printf("Verificação de PRIM: Número de cortes : %d | Número de códigos resultantes : %d\n", CCuts, Finals);
+                #ifdef CONSTANTS
+                    printf("Verificação das CONSTANTS: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsConst, FinalsConst);
+                #endif
             #endif
         #endif
     #endif
@@ -545,8 +555,29 @@ void apply_prim_list(void){
     #ifdef tofile
         for (l = 0; l < SIZE; l ++) fprintf(f_pass, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
     #endif
+    
     #ifdef NUMBERS
         Finals++;
+    #endif
+    #ifdef CONSTANTS
+        int temp;
+        for (i = 1 ; i < SIZE; i++) {
+            for (j = 0; j < SIZE ; j++) {
+                temp = Z[i] ^ Z[i ^ j];
+                if (temp < Z[j]) {
+                    #ifdef NUMBERS
+                        CCutsConst++;
+                    #endif
+                    return;
+                }
+                else if (temp > Z[j]) {
+                    break;
+                }
+            }
+        }
+    #endif
+    #ifdef NUMBERS
+        FinalsConst++;
     #endif
 
 }
