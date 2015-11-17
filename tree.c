@@ -68,28 +68,27 @@
 #define min(a,b) ((a) < (b) ? (a) : (b))
 
 
-
 #ifdef matriz
     ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
     ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
     #define TREE    1
 #else
     int list[SIZE+1][SIZE-1] = {{1}};         /*Adjacency list*/
-    int list_index [SIZE+1] = {1};            /*indexes to access the current list index of a given node*/
-    int parent[SIZE] = {-1,0};
+    int list_index [SIZE+1]  = {1};            /*indexes to access the current list index of a given node*/
+    int parent[SIZE]         = {-1,0};
 #endif
 
 uint16_t ZAux[SIZE] = {0};              /*Auxiliar Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
-uint16_t Z[SIZE] = {0,1};             /*Zeros of the representation*/
+uint16_t Z[SIZE]    = {0,1};             /*Zeros of the representation*/
 
 #ifdef NUMBERS
-    unsigned long long int CCount = 0;    /*Number of generated codes*/
-    unsigned long long int CCount1 = 0;   /*Number of something*/
-    unsigned long      int SCount = 0;    /*Number of generated Sequences*/
-    int CCuts = 0;
-    int Finals = 0;
-    int CCutsConst = 0;
-    int FinalsConst = 0;
+    unsigned long long int CCount      = 0; /*Number of generated codes*/
+    unsigned long long int CCount1     = 0; /*Number of something*/
+    unsigned long      int SCount      = 0; /*Number of generated Sequences*/
+    unsigned           int CCuts       = 0; /*Number of representations cut by the prim, i.e., the tree that generated it is NOT canonical*/
+    unsigned           int Finals      = 0; /*Number of representations accepted by the prim, i.e., the tree that generated it is canonical*/
+    unsigned           int CCutsConst  = 0; /*Number of representations cut by the constants verification, i.e, is NOT lexicographically minimal regarding constants*/
+    unsigned           int FinalsConst = 0; /*Number of representations cut by the constants verification, i.e, is lexicographically minimal regarding constants*/
 #endif
 
 #ifdef tofile
