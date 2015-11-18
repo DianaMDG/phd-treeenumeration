@@ -1,42 +1,49 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<math.h>
-#include<stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <stdint.h>
 
-#include"tree.h"
-#include"neutral_rep.h"
+#include "tree.h"
+#include "neutral_rep.h"
+#ifdef ITERATIVE
+    #include "iterative.h"
+#endif
 
-/*#define matriz      0*/
 
+/*List of defines*/
 /*#define NUMBERS     0*/
-/*#define tofile      0*/
-/*#define graph       1*/
-/*#define prim        0*/
+/*#define TOFILE      0*/
+/*#define GRAPH       1*/
+/*#define PRIM        0*/
 /*#define CONSTANTS   0*/
-
-/*#ifdef matriz
-    #pragma message "USING MATRIX"
-#else
-    #pragma message "USING LIST"
-#endif*/
+/*#define ITERATIVE   0*/
 
 #ifdef NUMBERS
-    #pragma message "counting"
+    #pragma message "counting sequences, representations and cuts"
 #endif
 
-#ifdef tofile
-    #pragma message "printing to file"
+#ifdef TOFILE
+    #pragma message "printing to files"
 #endif
 
-#ifdef graph
+#ifdef GRAPH
     #pragma message "generating representations"
 #endif
 
-#ifdef prim
+#ifdef PRIM
+    #ifndef GRAPH
+        #define GRAPH  1
+    #endif
     #pragma message "calculating minimum spanning tree using Prim algorithm"
 #endif
 
 #ifdef CONSTANTS
+    #ifndef PRIM
+        #define PRIM  1
+    #endif
+    #ifndef GRAPH
+        #define GRAPH  1
+    #endif
     #pragma message "Verifying if is minimal regarding constants"
 #endif
 
@@ -87,9 +94,9 @@ uint16_t Z[SIZE] = {0,1,2};             /*Zeros of the representation*/
     int FinalsConst = 0;
 #endif
 
-#ifdef tofile
+#ifdef TOFILE
     FILE *f_list;
-    #ifdef graph
+    #ifdef GRAPH
         FILE *f_cut, *f_pass;
     #endif
 #endif
@@ -116,9 +123,9 @@ int main() {
         int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};
     #endif
 
-    #ifdef tofile
+    #ifdef TOFILE
         f_list = fopen("list_representations.txt", "w");
-        #ifdef graph
+        #ifdef GRAPH
             f_cut = fopen("cut.txt", "w"); f_pass = fopen("pass.txt", "w");
         #endif
     #endif
@@ -146,7 +153,7 @@ int main() {
         printf("Número de códigos: %lld e %lld \n", CCount, CCount1);
         printf("numero de sequências: %ld\n", SCount);
 
-        #ifdef graph
+        #ifdef GRAPH
             printf("Verificação de PRIM: Número de cortes : %d | Número de códigos resultantes : %d\n", CCuts, Finals);
             #ifdef CONSTANTS
                 printf("Verificação das CONSTANTS: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsConst, FinalsConst);
@@ -154,9 +161,9 @@ int main() {
         #endif
     #endif
 
-    #ifdef tofile
+    #ifdef TOFILE
         fclose(f_list);
-        #ifdef graph
+        #ifdef GRAPH
             fclose(f_cut);
             fclose(f_pass);
         #endif
@@ -207,54 +214,10 @@ void generate_seq(int spaces, int *generated) {
             generate_tree(generated);
 
             /*break;*/      /*additional break for testing*/
-            #ifdef tofile
+            #ifdef TOFILE
                 int j; for ( j = 0; j < SIZE-4; j++) fprintf(f_list, "%s%d %s",  j==0?"[":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
             #endif
         }
-    }
-}
-
-void generate_seq_iteratively(int *generated) {
-    /*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
-    /* NOTE: may be outdated */
-
-    int i, j;
-    int div, res;
-    int base = SIZE - 2;
-    /*int index;*/
-
-    #if N == 15
-        for (i = 0; i < CORTE; i++) {
-    #else
-        for (i = 0; i < pow((SIZE-2), (SIZE-4)); i++) {
-    #endif
-        /*index = 0;*/
-        div = i / base;
-        res = i % base;
-        generated [SIZE-5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
-
-        for (j = SIZE-6 ; j > 1; j--) {
-        /*while (div != 0 || res != 0) {*/
-            res = div % base;
-            div = div / base;
-            generated [j] = res + 3; /*again, 3 ... */
-        }
-
-        /*just in case some missed*/
-        /*for (j = index; j < (SIZE - 4); j++) {
-            generated [j] = 3;*/ /*again, 3 ... */
-        /*}*/
-
-        #ifdef NUMBERS
-            SCount++;
-        #endif
-
-        /*int j; for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
-        #ifdef tofile
-            int j; for ( j = 0; j < SIZE-4; j++) fprintf(f_list, "%s%d %s",  j==0?"[":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
-        #endif
-        /*Generate tree associated to the sequence generated*/
-        generate_tree(generated);
     }
 }
 
@@ -341,41 +304,11 @@ void unfold_SN_list_recursive(int index) {
             #ifdef NUMBERS
                 CCount++;
             #endif
-            #ifdef graph
+            #ifdef GRAPH
                 generate_graph_list();
             #endif
             list[i][--list_index[i]] = 0;
         }
-    }
-}
-
-static void unfold_SN_list(void) {
-    /*Function used to generate combinations of connections to super node*/
-
-    int i = powb3[list_index[SIZE]], j;
-    int div, res;
-    int index; /*index do no ligado ao super no*/
-    /*int nodes[3] = {list_index[0], list_index[1], list_index[2]};*/
-
-    /*for (i = 0; i < powb3[list_index[SIZE]]; i++) {*/
-    while (i--) {
-        index = 0;                  /*restarting from the first node*/
-        for (j = 0, div = i; j < list_index[SIZE]; j++) {
-            res = div % 3;
-            div = div / 3;
-            list[res][list_index[res]++] = list[SIZE][index++];
-        }
-        #ifdef NUMBERS
-            CCount++;
-        #endif
-        #ifdef graph
-            generate_graph_list();
-        #endif
-
-        /*reseting the list indexes TODO might be unecessary*/
-        list_index[0] = 2;
-        list_index[1] = 0;
-        list_index[2] = 0;
     }
 }
 
@@ -402,11 +335,11 @@ void generate_graph_list(void) {
     /*print the representation Z*/
     /*for ( j = 0; j < SIZE; j++) printf("%s %d %s",  j==0?"\nZ = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n\n");*/
 
-    #ifdef prim
+    #ifdef PRIM
         apply_prim_list();
     #endif
 
-    #ifdef tofile
+    #ifdef TOFILE
         for ( j = 0; j < SIZE; j++) { fprintf(f_list,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
     #endif
 
@@ -431,7 +364,7 @@ void apply_prim_list(void){
                 mask[j] = 1;
 
                 if (parent[j] != next_node[i]) {
-                    #ifdef tofile
+                    #ifdef TOFILE
                         for (l = 0; l < SIZE; l ++) fprintf(f_cut, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
                     #endif
                     #ifdef NUMBERS
@@ -443,7 +376,7 @@ void apply_prim_list(void){
         }
     }
 
-    #ifdef tofile
+    #ifdef TOFILE
         for (l = 0; l < SIZE; l ++) fprintf(f_pass, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
     #endif
 
