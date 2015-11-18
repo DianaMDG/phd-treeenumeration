@@ -39,7 +39,7 @@
 #endif
 
 /*NOTE*/
-/* N    : Number of bis used by the representation, N used in the neutral network NN(n,k)*/
+/* N    : Number of bits used by the representation, N used in the neutral network NN(n,k)*/
 /* SIZE : Number of syndromes, number of nodes in the tree*/
 /* K    : Number of information bits*/
 /* G    : Generator polynomial for the codes */
@@ -69,17 +69,17 @@
 
 
 #ifdef matriz
-    ele_t adjacency[(SIZE+1)*(SIZE)/2];     /*Triangular Adjacency matrix*/
-    ele_t *lines[SIZE];                     /*Array of indexes to access the adjacency matrix*/
+    ele_t adjacency[(SIZE+1)*(SIZE)/2]; /*Triangular Adjacency matrix*/
+    ele_t *lines[SIZE];                 /*Array of indexes to access the adjacency matrix*/
     #define TREE    1
 #else
-    int list[SIZE+1][SIZE-1] = {{1}};         /*Adjacency list*/
-    int list_index [SIZE+1]  = {1};            /*indexes to access the current list index of a given node*/
+    int list[SIZE+1][SIZE-1] = {{1}};   /*Adjacency list*/
+    int list_index [SIZE+1]  = {1};     /*indexes to access the current list index of a given node*/
     int parent[SIZE]         = {-1,0};
 #endif
 
 uint16_t ZAux[SIZE] = {0};              /*Auxiliar Zeros with each syndrome with Hamming distance 1 from 0 for computing representation zeros*/
-uint16_t Z[SIZE]    = {0,1};             /*Zeros of the representation*/
+uint16_t Z[SIZE]    = {0,1};            /*Zeros of the representation*/
 
 #ifdef NUMBERS
     unsigned long long int CCount      = 0; /*Number of generated codes*/
@@ -106,6 +106,7 @@ FILE *f_teste;
 /******************************************************************/
 /************************   MAIN   ********************************/
 /******************************************************************/
+/*For the */
 int powb3[13];
 int main() {
 
@@ -123,7 +124,7 @@ int main() {
     int j;
     uint16_t c = 0, b, t;
     /*int teste[SIZE-4] = {4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,4 ,3 ,3 ,3};*/
-    int teste[SIZE-4] = {2,7,5,3,8};
+    int teste[SIZE-3] = {8,2,2,8,2};
 
     #ifdef tofile
         #ifdef matriz
@@ -557,19 +558,20 @@ void apply_prim_list(void){
         }
     }
     
-    #ifdef tofile
-        for (l = 0; l < SIZE; l ++) fprintf(f_pass, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
-    #endif
     
     #ifdef NUMBERS
         Finals++;
     #endif
+
     #ifdef CONSTANTS
         int temp;
         for (i = 1 ; i < SIZE; i++) {
             for (j = 0; j < SIZE ; j++) {
                 temp = Z[i] ^ Z[i ^ j];
                 if (temp < Z[j]) {
+                    #ifdef tofile
+                        for (l = 0; l < SIZE; l ++) fprintf(f_cut, "%s %d %s",  l==0?"Z = [":"", Z[l], l< SIZE-1 ? ",\0":"]\n");
+                    #endif
                     #ifdef NUMBERS
                         CCutsConst++;
                     #endif
@@ -583,6 +585,9 @@ void apply_prim_list(void){
     #endif
     #ifdef NUMBERS
         FinalsConst++;
+    #endif
+    #ifdef tofile
+        for (l = 0; l < SIZE; l ++) fprintf(f_pass, "%s %d %s", l == 0 ? "Z = [" : "", Z[l], l < SIZE - 1 ? ",\0" : "]\n");
     #endif
 
 }
@@ -734,7 +739,7 @@ void generate_graph(void) {
     CUIDADO:
 
     #ifdef tofile
-            for ( j = 0; j < SIZE; j++) { fprintf(f_matrix,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
+        for ( j = 0; j < SIZE; j++) { fprintf(f_matrix,"%s %d %s",  j==0?"Z = [":"", Z[j], j< SIZE-1 ? ",\0":"]\n"); }
     #endif
 
     /*clear Z*/
