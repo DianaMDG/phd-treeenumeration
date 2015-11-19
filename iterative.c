@@ -46,10 +46,12 @@ void generate_seq_iterative(int *generated) {
             SCount++;
         #endif
 
+        /*prints new sequence*/
         /*int j; for (j = 0; j < SIZE - 4; j++) printf("%s %d %s", j == 0 ? "\nNew sequence: [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");*/
         #ifdef TOFILE
-            int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_list, "%s %d %s", j == 0 ? "[" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
+            int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%s %d %s", j == 0 ? "seq = [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
         #endif
+
         /*Generate tree associated to the sequence generated*/
         generate_tree(generated);
     }
@@ -59,6 +61,7 @@ void generate_seq_iterative(int *generated) {
 
 static void unfold_SN_list_iterative() {
     /*Iterative function used to generate combinations of connections to super node*/
+    /*NOTE: may be outdated*/
 
     int i = powb3[list_index[SIZE]];
     int j;
@@ -77,6 +80,7 @@ static void unfold_SN_list_iterative() {
         #ifdef NUMBERS
             CCount++;
         #endif
+
         #ifdef GRAPH
             generate_graph();
         #endif
