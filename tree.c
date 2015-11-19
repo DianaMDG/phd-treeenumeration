@@ -59,9 +59,8 @@ uint16_t ZAux[SIZE] = {0};            /*Auxiliar Zeros with each syndrome with H
 uint16_t Z[SIZE]    = {0, 1, 2};      /*Zeros of the representation*/
 
 #ifdef NUMBERS
-    unsigned long long int CCount      = 0;     /*Number of generated codes*/
-    unsigned long long int CCount1     = 0;     /*Number of something TODO*/
     unsigned long      int SCount      = 0;     /*Number of generated Sequences*/
+    unsigned long long int CCount      = 0;     /*Number of generated Codes*/
     unsigned           int CCutsPrim   = 0;     /*Number of representations the trees of which are NOT canonical*/
     unsigned           int FinalsPrim  = 0;     /*Number of representations the trees of which are canonical*/
     unsigned           int CCutsConst  = 0;     /*Number of representations which are NOT minimal regarding constants*/
@@ -69,8 +68,12 @@ uint16_t Z[SIZE]    = {0, 1, 2};      /*Zeros of the representation*/
 #endif
 
 #ifdef TOFILE
-    FILE *f_list;               /*File with the list of Prüfer sequences generated TODO name*/
+    FILE *f_seq;                /*File with the list of Prüfer sequences generated TODO name*/
     #ifdef GRAPH
+        FILE *f_rep;            /*File with the list of representations generated*/
+    #endif
+
+    #if defined(CONSTANTS) || defined(PRIM)
         FILE *f_cut;            /*File with the list of representations that do NOT fulfill the requirements of the program*/
         FILE *f_pass;           /*File with the list of representations that fulfill all requirements of the program*/
     #endif
@@ -96,8 +99,12 @@ int main(int argc, char *argv[]) {
     #endif
 
     #ifdef TOFILE
-        f_list = fopen("list_representations.txt", "w");
+        f_seq = fopen("sequences.txt", "w");
         #ifdef GRAPH
+            f_rep = fopen("representations.txt", "w");
+        #endif
+
+        #if defined(PRIM) || defined(CONSTANTS)
             f_cut = fopen("cut.txt", "w"); 
             f_pass = fopen("pass.txt", "w");
         #endif
@@ -122,9 +129,11 @@ int main(int argc, char *argv[]) {
         #elif N == 15
             int test[SIZE - 4] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3};
         #endif
+
         generate_tree(teste);
     #else
         int generated[SIZE - 4];
+
         #ifndef ITERATIVE
             generate_seq(SIZE - 4, generated);
         #else
@@ -134,18 +143,28 @@ int main(int argc, char *argv[]) {
 
     #ifdef NUMBERS
         printf("Número de sequências: %ld\n", SCount);
-        printf("Número de códigos: %lld e %lld \n", CCount, CCount1); /*TODO*/
+
         #ifdef GRAPH
+            printf("Número de códigos: %lld \n", CCount);
+        #endif
+
+        #ifdef PRIM
             printf("Verificação de PRIM: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsPrim, FinalsPrim);
-            #ifdef CONSTANTS
-                printf("Verificação das CONSTANTS: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsConst, FinalsConst);
-            #endif
+        #endif
+
+        #ifdef CONSTANTS
+            printf("Verificação das CONSTANTS: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsConst, FinalsConst);
         #endif
     #endif
 
     #ifdef TOFILE
-        fclose(f_list);
+        fclose(f_seq);
+
         #ifdef GRAPH
+            fclose(f_rep);
+        #endif
+
+        #if defined(CONSTANTS) || defined(PRIM)
             fclose(f_cut);
             fclose(f_pass);
         #endif
@@ -196,7 +215,7 @@ void generate_seq(int spaces, int *generated) {
 
             /*break;*/      /*additional break for testing*/
             #ifdef TOFILE
-                int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_list, "%s %d %s", j == 0 ? "[" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
+                int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%s %d %s", j == 0 ? "[" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
             #endif
         }
     }
@@ -270,9 +289,7 @@ void generate_tree(int *seq) {
 void unfold_SN_list(int index) {
     /*Recursive function used to combinate connections to the super node*/
     /*index - index of the nodes connected to the super node*/
-    /*NOTE: This function procedes as follows: for each node connected to the
-    super node (which number is SIZE), associates it with all the individual
-    nodes in the super node and then recursively calls the next one*/
+    /*NOTE: This function procedes as follows: for each node connected to the super node (which number is SIZE), associates it with all the individual nodes in the super node and then recursively calls the next one*/
 
     int i;
 
@@ -295,8 +312,7 @@ void unfold_SN_list(int index) {
             /*print_list();*/
 
             /*print the parent array*/
-            /*int j; for (j = 0; j < SIZE; j++) printf ("%s %d %s", 
-                j == 0 ? "Z = [" : "", parent[j], j < SIZE - 1 ? ",\0" : "]\n");
+            /*int j; for (j = 0; j < SIZE; j++) printf ("%s %d %s", j == 0 ? "Z = [" : "", parent[j], j < SIZE - 1 ? ",\0" : "]\n");
                 */
 
             #ifdef NUMBERS
@@ -312,9 +328,9 @@ void unfold_SN_list(int index) {
     }
 }
 
-void generate_graph() {/*TODO description*/
+void generate_graph() {
     /*Function that generates the zero representation for a given tree*/
-    /*NOTE: */
+    /*NOTE: Runs allong the tree, from the root (0) to the leaves, and computes the zero for each syndrome given by the nodes. Computation is used with the information from ZAux array, computed previously*/
 
     int i, j;
     int next_node[SIZE] = {0};
@@ -340,7 +356,7 @@ void generate_graph() {/*TODO description*/
     #endif
 
     #ifdef TOFILE
-        for (j = 0; j < SIZE; j++)  fprintf(f_list, "%s %d %s", j == 0 ? "Z = [" : "", Z[j], j < SIZE - 1 ? ",\0" : "]\n");
+        for (j = 0; j < SIZE; j++)  fprintf(f_rep, "%s %d %s", j == 0 ? "Z = [" : "", Z[j], j < SIZE - 1 ? ",\0" : "]\n");
     #endif
 
     /*clear Z*/
@@ -350,17 +366,22 @@ void generate_graph() {/*TODO description*/
 }
 
 void verify_representation() {
-    /*Function that applies cuts to a given representation according to user defines*/
+    /*Function that applies cuts to the representation according to specified by the user*/
+    /*NOTE: The verifications applied depend on the defines PRIM and CONSTANTS and is applied to the current representation Z*/
 
-    int i, j;
-    int next_node[SIZE] = {0};
-    int index = 1;              /*index of next_node array*/
-    int mask[SIZE] = {1};
+    #if defined(PRIM) || defined(CONSTANTS)
+        int i, j;
+    #endif
+
     #ifdef TOFILE
         int l;
     #endif
 
     #ifdef PRIM
+        int next_node[SIZE] = {0};
+        int index = 1;              /*index of next_node array*/
+        int mask[SIZE] = {1};
+
         for (i = 0; i < SIZE; i++) {
             for (j = 0; j < SIZE; j++) {
                 if (!mask[j] && __builtin_popcount(Z[next_node[i]] ^ Z[j]) == 1) {
@@ -394,13 +415,16 @@ void verify_representation() {
 
     #ifdef CONSTANTS
         int temp;
+
         for (i = 1 ; i < SIZE; i++) {
             for (j = 0; j < SIZE; j++) {
                 temp = Z[i] ^ Z[i ^ j];
                 if (temp < Z[j]) {
+
                     #ifdef NUMBERS
                         CCutsConst++;
                     #endif
+
                     return;
                 }
                 else if (temp > Z[j]) {
@@ -449,3 +473,91 @@ void clear_list() {
         list_index[i] = 0;
     }
 }
+
+/************************************************************************
+*                  Functions for the Iterative Case
+*************************************************************************/
+#ifdef ITERATIVE
+
+void generate_seq_iterative(int *generated) {
+    /*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
+    /*NOTE: may be outdated */
+
+    int i, j;
+    int div, res;
+    int base = SIZE - 2;
+    /*int index;*/
+
+    #if N == 15
+        for (i = 0; i < CORTE; i++) {
+    #else
+        for (i = 0; i < pow((SIZE - 2), (SIZE - 4)); i++) {
+    #endif
+        /*index = 0;*/
+        div = i / base;
+        res = i % base;
+        generated [SIZE - 5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
+
+        for (j = SIZE - 6; j > 1; j--) {
+        /*while (div != 0 || res != 0) {*/
+            res = div % base;
+            div = div / base;
+            generated [j] = res + 3; /*again, 3 ... */
+        }
+
+        /*just in case some missed*/
+        /*for (j = index; j < SIZE - 4; j++) {
+            generated [j] = 3;
+        }*/
+
+        #ifdef NUMBERS
+            SCount++;
+        #endif
+
+        /*prints new sequence*/
+        /*int j; for (j = 0; j < SIZE - 4; j++) printf("%s %d %s", j == 0 ? "\nNew sequence: [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");*/
+        #ifdef TOFILE
+            int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%s %d %s", j == 0 ? "seq = [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
+        #endif
+
+        /*Generate tree associated to the sequence generated*/
+        generate_tree(generated);
+    }
+}
+
+
+
+static void unfold_SN_list_iterative() {
+    /*Iterative function used to generate combinations of connections to super node*/
+    /*NOTE: may be outdated*/
+
+    int i = powb3[list_index[SIZE]];
+    int j;
+    int div, res;
+    int index; /*index do no ligado ao super no*/
+    /*int nodes[3] = {list_index[0], list_index[1], list_index[2]};*/
+
+    /*for (i = 0; i < powb3[list_index[SIZE]]; i++) {*/
+    while (i--) {
+        index = 0;                  /*restarting from the first node*/
+        for (j = 0, div = i; j < list_index[SIZE]; j++) {
+            res = div % 3;
+            div = div / 3;
+            list[res][list_index[res]++] = list[SIZE][index++];
+        }
+        #ifdef NUMBERS
+            CCount++;
+        #endif
+
+        #ifdef GRAPH
+            generate_graph();
+        #endif
+
+        /*reseting the list indexes */
+        list_index[0] = 2;
+        list_index[1] = 0;
+        list_index[2] = 0;
+    }
+}
+
+#endif
