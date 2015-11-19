@@ -43,6 +43,10 @@
     #pragma message "running the program for a single Prüfer sequence"
 #endif
 
+#ifdef ITERATIVE
+    #pragma message "running iterative case"
+#endif
+
 /************************************************************************
 *
 *                        FUNCTION Declaration
