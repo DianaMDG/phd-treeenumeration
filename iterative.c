@@ -1,9 +1,19 @@
 #include "tree.h"
 #include "iterative.h"
 
-void generate_seq_iteratively(int *generated) {
+/************************************************************************
+*
+*                       FUNCTION Definition
+*
+************************************************************************/
+
+/************************************************************************
+*                  Functions for the Iterative Case
+*************************************************************************/
+
+void generate_seq_iterative(int *generated) {
     /*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
-    /* NOTE: may be outdated */
+    /*NOTE: may be outdated */
 
     int i, j;
     int div, res;
@@ -13,14 +23,14 @@ void generate_seq_iteratively(int *generated) {
     #if N == 15
         for (i = 0; i < CORTE; i++) {
     #else
-        for (i = 0; i < pow((SIZE-2), (SIZE-4)); i++) {
+        for (i = 0; i < pow((SIZE - 2), (SIZE - 4)); i++) {
     #endif
         /*index = 0;*/
         div = i / base;
         res = i % base;
-        generated [SIZE-5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
+        generated [SIZE - 5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
 
-        for (j = SIZE-6 ; j > 1; j--) {
+        for (j = SIZE - 6; j > 1; j--) {
         /*while (div != 0 || res != 0) {*/
             res = div % base;
             div = div / base;
@@ -28,17 +38,17 @@ void generate_seq_iteratively(int *generated) {
         }
 
         /*just in case some missed*/
-        /*for (j = index; j < (SIZE - 4); j++) {
-            generated [j] = 3;*/ /*again, 3 ... */
-        /*}*/
+        /*for (j = index; j < SIZE - 4; j++) {
+            generated [j] = 3;
+        }*/
 
         #ifdef NUMBERS
             SCount++;
         #endif
 
-        /*int j; for ( j = 0; j < SIZE-4; j++) printf("%s%d %s",  j==0?"\nNew sequence: [":"", generated[j], j< SIZE-5 ? ",\0":"]\n");*/
+        /*int j; for (j = 0; j < SIZE - 4; j++) printf("%s %d %s", j == 0 ? "\nNew sequence: [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");*/
         #ifdef TOFILE
-            int j; for ( j = 0; j < SIZE-4; j++) fprintf(f_list, "%s%d %s",  j==0?"[":"", generated[j], j< SIZE-5 ? ",\0":"]\n");
+            int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_list, "%s %d %s", j == 0 ? "[" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
         #endif
         /*Generate tree associated to the sequence generated*/
         generate_tree(generated);
@@ -47,10 +57,11 @@ void generate_seq_iteratively(int *generated) {
 
 
 
-static void unfold_SN_list(void) {
-    /*Function used to generate combinations of connections to super node*/
+static void unfold_SN_list_iterative() {
+    /*Iterative function used to generate combinations of connections to super node*/
 
-    int i = powb3[list_index[SIZE]], j;
+    int i = powb3[list_index[SIZE]];
+    int j;
     int div, res;
     int index; /*index do no ligado ao super no*/
     /*int nodes[3] = {list_index[0], list_index[1], list_index[2]};*/
@@ -67,10 +78,10 @@ static void unfold_SN_list(void) {
             CCount++;
         #endif
         #ifdef GRAPH
-            generate_graph_list();
+            generate_graph();
         #endif
 
-        /*reseting the list indexes TODO might be unecessary*/
+        /*reseting the list indexes */
         list_index[0] = 2;
         list_index[1] = 0;
         list_index[2] = 0;

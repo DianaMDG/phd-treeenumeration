@@ -1,10 +1,16 @@
-/******************************************************************/
-/******************   FUNCTION Declaration   **********************/
-/******************************************************************/
+/************************************************************************
+*
+*                      FUNCTION Declaration
+*
+*************************************************************************/
 
-void generate_seq_iteratively(int *generated);
-/*Iterative function that generates the Prüfer sequences that will generate the trees WITH THE SUPER NODE*/
+/************************************************************************
+*                  Functions for the Iterative Case
+*************************************************************************/
 
-static void unfold_SN_list(void);
-/*Function used to generate combinations of connections to super node*/
+/*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
+void generate_seq_iterative(int *generated);
+
+/*Iterative function used to generate combinations of connections to super node*/
+static void unfold_SN_list_iterative();
 
