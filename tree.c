@@ -5,9 +5,6 @@
 
 #include "tree.h"
 #include "neutral_rep.h"
-#ifdef ITERATIVE
-    #include "iterative.h"
-#endif
 
 /******************************************************************
 *
@@ -130,7 +127,7 @@ int main(int argc, char *argv[]) {
             int test[SIZE - 4] = {4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3};
         #endif
 
-        generate_tree(teste);
+        generate_tree(test);
     #else
         int generated[SIZE - 4];
 
@@ -347,7 +344,7 @@ void generate_graph() {
     }
 
     /*print the parent array*/
-    /*for (j = 0; j < SIZE; j++) printf ("%s %d %s", j == 0 ? "Z = [" : "", parent[j], j < SIZE - 1 ? ",\0" : "]\n\n\n");*/
+    /*for (j = 0; j < SIZE; j++) printf ("%s %d %s", j == 0 ? "parent = [" : "", parent[j], j < SIZE - 1 ? ",\0" : "]\n\n\n");*/
     /*print the representation Z*/
     /*for (j = 0; j < SIZE; j++) printf("%s %d %s", j == 0 ? "\nZ = [" : "", Z[j], j < SIZE - 1 ? ",\0" : "]\n\n");*/
 
@@ -371,11 +368,12 @@ void verify_representation() {
 
     #if defined(PRIM) || defined(CONSTANTS)
         int i, j;
+
+        #ifdef TOFILE
+            int l;
+        #endif
     #endif
 
-    #ifdef TOFILE
-        int l;
-    #endif
 
     #ifdef PRIM
         int next_node[SIZE] = {0};
@@ -478,86 +476,78 @@ void clear_list() {
 *                  Functions for the Iterative Case
 *************************************************************************/
 #ifdef ITERATIVE
+    void generate_seq_iterative(int *generated) {
+        /*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
+        /*NOTE: */
 
-void generate_seq_iterative(int *generated) {
-    /*Iterative function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
-    /*NOTE: may be outdated */
+        int i, j;
+        int div, res;
+        int base = SIZE - 2;
 
-    int i, j;
-    int div, res;
-    int base = SIZE - 2;
-    /*int index;*/
+        #if N == 15
+            for (i = 0; i < CORTE; i++) {
+        #else
+            for (i = 0; i < pow((SIZE - 2), (SIZE - 4)); i++) {
+        #endif
 
-    #if N == 15
-        for (i = 0; i < CORTE; i++) {
-    #else
-        for (i = 0; i < pow((SIZE - 2), (SIZE - 4)); i++) {
-    #endif
-        /*index = 0;*/
-        div = i / base;
-        res = i % base;
-        generated [SIZE - 5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
+            div = i / base;
+            res = i % base;
+            generated [SIZE - 5] = res + 3;   /*3 comes from shifting the nodes not in the Super Node*/
 
-        for (j = SIZE - 6; j > 1; j--) {
-        /*while (div != 0 || res != 0) {*/
-            res = div % base;
-            div = div / base;
-            generated [j] = res + 3; /*again, 3 ... */
+            for (j = SIZE - 6; j > -1; j--) {
+                res = div % base;
+                div = div / base;
+                generated [j] = res + 3; /*again, 3 ... */
+            }
+
+            #ifdef NUMBERS
+                SCount++;
+            #endif
+
+            /*prints new sequence*/
+            /*int k; for (k = 0; k < SIZE - 4; k++) printf("%s %d %s", k == 0 ? "seq = [" : "", generated[k], k < SIZE - 5 ? ",\0" : "]\n");*/
+
+            #ifdef TOFILE
+                int l; for (l = 0; l < SIZE - 4; l++) fprintf(f_seq, "%s %d %s", l == 0 ? "seq = [" : "", generated[l], l < SIZE - 5 ? ",\0" : "]\n");
+            #endif
+
+            /*Generate tree associated to the sequence generated*/
+            generate_tree(generated);
         }
-
-        /*just in case some missed*/
-        /*for (j = index; j < SIZE - 4; j++) {
-            generated [j] = 3;
-        }*/
-
-        #ifdef NUMBERS
-            SCount++;
-        #endif
-
-        /*prints new sequence*/
-        /*int j; for (j = 0; j < SIZE - 4; j++) printf("%s %d %s", j == 0 ? "\nNew sequence: [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");*/
-        #ifdef TOFILE
-            int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%s %d %s", j == 0 ? "seq = [" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
-        #endif
-
-        /*Generate tree associated to the sequence generated*/
-        generate_tree(generated);
     }
-}
 
 
 
-static void unfold_SN_list_iterative() {
-    /*Iterative function used to generate combinations of connections to super node*/
-    /*NOTE: may be outdated*/
+    static void unfold_SN_list_iterative() {
+        /*Iterative function used to generate combinations of connections to super node*/
+        /*NOTE: */
 
-    int i = powb3[list_index[SIZE]];
-    int j;
-    int div, res;
-    int index; /*index do no ligado ao super no*/
-    /*int nodes[3] = {list_index[0], list_index[1], list_index[2]};*/
+        int i = powb3[list_index[SIZE]];
+        int j;
+        int div, res;
+        int index; /*index do no ligado ao super no*/
 
-    /*for (i = 0; i < powb3[list_index[SIZE]]; i++) {*/
-    while (i--) {
-        index = 0;                  /*restarting from the first node*/
-        for (j = 0, div = i; j < list_index[SIZE]; j++) {
-            res = div % 3;
-            div = div / 3;
-            list[res][list_index[res]++] = list[SIZE][index++];
-        }
-        #ifdef NUMBERS
-            CCount++;
-        #endif
+            while (i--) {
+                index = 0;                  /*restarting from the first node*/
+                for (j = 0, div = i; j < list_index[SIZE]; j++) {
+                    res = div % 3;
+                    div = div / 3;
+                    list[res][list_index[res]++] = list[SIZE][index];
+                    parent[list[SIZE][index++]] = res;
+                }
 
-        #ifdef GRAPH
-            generate_graph();
-        #endif
+                #ifdef NUMBERS
+                    CCount++;
+                #endif
 
-        /*reseting the list indexes */
-        list_index[0] = 2;
-        list_index[1] = 0;
-        list_index[2] = 0;
+                #ifdef GRAPH
+                    generate_graph();
+                #endif
+
+                /*reseting the list indexes */
+                list_index[0] = 2;
+                list_index[1] = 0;
+                list_index[2] = 0;
+            }
     }
-}
-
 #endif
