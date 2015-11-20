@@ -1,57 +1,11 @@
 /************************************************************************
 *
-*                              DEFINEs
-*
-************************************************************************/
-
-/*List of defines*/
-/*#define NUMBERS       when defined: counts number of sequences, representations and cuts*/
-/*#define TOFILE        when defined: prints sequences, representations and cuts to files*/
-/*#define GRAPH         when defined: generates the representation associated with each sequence*/
-/*#define PRIM          when defined: checks if the tree is canonical using the Prim algorithm*/
-/*#define CONSTANTS     when defined: checks if the representation is minimal regarding constants*/
-/*#define ITERATIVE     when defined: generates the sequences and unfolds the super node iteratively. WARNING! Is slower!*/
-/*#define TEST          when defined: runs the code for a single test Prüfer sequence*/
-
-#ifdef NUMBERS
-    #pragma message "counting sequences, representations and cuts"
-#endif
-
-#ifdef TOFILE
-    #pragma message "printing to files"
-#endif
-
-#ifdef GRAPH
-    #pragma message "generating representations"
-#endif
-
-#ifdef PRIM
-    #ifndef GRAPH
-        #define GRAPH  1
-    #endif
-    #pragma message "calculating minimum spanning tree using Prim algorithm"
-#endif
-
-#ifdef CONSTANTS
-    #ifndef GRAPH
-        #define GRAPH  1
-    #endif
-    #pragma message "Verifying if is minimal regarding constants"
-#endif
-
-#ifdef TEST
-    #pragma message "running the program for a single Prüfer sequence"
-#endif
-
-#ifdef ITERATIVE
-    #pragma message "running iterative case"
-#endif
-
-/************************************************************************
-*
 *                        FUNCTION Declaration
 *
 ************************************************************************/
+
+/*Function that runs the program*/
+void program();
 
 /*Recursive function that generates the Prüfer sequences that will generate the trees with the 1-0-2 super node*/
 void generate_seq(int spaces, int *generated);

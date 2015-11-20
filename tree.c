@@ -6,6 +6,57 @@
 #include "tree.h"
 #include "neutral_rep.h"
 
+
+/************************************************************************
+*
+*                              DEFINEs
+*
+************************************************************************/
+
+/*List of defines*/
+/*#define NUMBERS       when defined: counts number of sequences, representations and cuts*/
+/*#define TOFILE        when defined: prints sequences, representations and cuts to files*/
+/*#define GRAPH         when defined: generates the representation associated with each sequence*/
+/*#define PRIM          when defined: checks if the tree is canonical using the Prim algorithm*/
+/*#define CONSTANTS     when defined: checks if the representation is minimal regarding constants*/
+/*#define ITERATIVE     when defined: generates the sequences and unfolds the super node iteratively. WARNING! Is slower!*/
+/*#define TEST          when defined: runs the code for a single test Prüfer sequence*/
+
+#ifdef NUMBERS
+    #pragma message "counting sequences, representations and cuts"
+#endif
+
+#ifdef TOFILE
+    #pragma message "printing to files"
+#endif
+
+#ifdef GRAPH
+    #pragma message "generating representations"
+#endif
+
+#ifdef PRIM
+    #ifndef GRAPH
+        #define GRAPH  1
+    #endif
+    #pragma message "calculating minimum spanning tree using Prim algorithm"
+#endif
+
+#ifdef CONSTANTS
+    #ifndef GRAPH
+        #define GRAPH  1
+    #endif
+    #pragma message "Verifying if is minimal regarding constants"
+#endif
+
+#ifdef TEST
+    #pragma message "running the program for a single Prüfer sequence"
+#endif
+
+#ifdef ITERATIVE
+    #pragma message "running iterative case"
+#endif
+
+
 /******************************************************************
 *
 *              PARAMETER Declaration & Definition
@@ -41,6 +92,7 @@
 
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define min(a,b) ((a) < (b) ? (a) : (b))
+
 
 /******************************************************************
 *
@@ -86,7 +138,8 @@ uint16_t Z[SIZE]    = {0, 1, 2};      /*Zeros of the representation*/
 *                             MAIN
 *
 ******************************************************************/
-int main(int argc, char *argv[]) {
+void program() {
+    /*Function that runs the program*/
 
     #ifdef ITERATIVE
         int i;
@@ -167,7 +220,6 @@ int main(int argc, char *argv[]) {
         #endif
     #endif
 
-    return 0;
 }
 
 /******************************************************************/
@@ -212,7 +264,8 @@ void generate_seq(int spaces, int *generated) {
 
             /*break;*/      /*additional break for testing*/
             #ifdef TOFILE
-                int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%s %d %s", j == 0 ? "[" : "", generated[j], j < SIZE - 5 ? ",\0" : "]\n");
+                int j; for (j = 0; j < SIZE - 4; j++) fprintf(f_seq, "%4d", generated[j]);
+                fprintf(f_seq, "\n");
             #endif
         }
     }
@@ -353,7 +406,8 @@ void generate_graph() {
     #endif
 
     #ifdef TOFILE
-        for (j = 0; j < SIZE; j++)  fprintf(f_rep, "%s %d %s", j == 0 ? "Z = [" : "", Z[j], j < SIZE - 1 ? ",\0" : "]\n");
+        for (j = 0; j < SIZE; j++)  fprintf(f_rep, "%4d", Z[j]);
+        fprintf(f_rep, "%4d", Z[j]);
     #endif
 
     /*clear Z*/
@@ -389,7 +443,8 @@ void verify_representation() {
                     if (parent[j] != next_node[i]) {
 
                         #ifdef TOFILE
-                            for (l = 0; l < SIZE; l++) fprintf(f_cut, "%s %d %s", l == 0 ? "Z = [" : "", Z[l], l < SIZE - 1 ? ",\0" : "]\n");
+                            for (l = 0; l < SIZE; l++) fprintf(f_cut, "%4d", Z[l]);
+                            fprintf(f_cut, "\n");
                         #endif
 
                         #ifdef NUMBERS
@@ -403,7 +458,8 @@ void verify_representation() {
         }
 
         #if defined(TOFILE) && !defined(CONSTANTS)
-            for (l = 0; l < SIZE; l++) fprintf(f_pass, "%s %d %s", l == 0 ? "Z = [" : "", Z[l], l < SIZE - 1 ? ",\0" : "]\n");
+            for (l = 0; l < SIZE; l++) fprintf(f_pass, "%4d", Z[l]);
+            fprintf(f_pass, "\n");
         #endif
 
         #ifdef NUMBERS
@@ -419,6 +475,11 @@ void verify_representation() {
                 temp = Z[i] ^ Z[i ^ j];
                 if (temp < Z[j]) {
 
+                    #ifdef TOFILE
+                        for (l = 0; l < SIZE; l++) fprintf(f_cut, "%4d", Z[l]);
+                        fprintf(f_cut, "\n");
+                    #endif
+
                     #ifdef NUMBERS
                         CCutsConst++;
                     #endif
@@ -432,7 +493,8 @@ void verify_representation() {
         }
 
         #ifdef TOFILE
-            for (l = 0; l < SIZE; l++) fprintf(f_pass, "%s %d %s", l == 0 ? "Z = [" : "", Z[l], l < SIZE - 1 ? ",\0" : "]\n");
+            for (l = 0; l < SIZE; l++) fprintf(f_pass, "%4d", Z[l]);
+            fprintf(f_pass, "\n");
         #endif
 
         #ifdef NUMBERS
@@ -508,7 +570,8 @@ void clear_list() {
             /*int k; for (k = 0; k < SIZE - 4; k++) printf("%s %d %s", k == 0 ? "seq = [" : "", generated[k], k < SIZE - 5 ? ",\0" : "]\n");*/
 
             #ifdef TOFILE
-                int l; for (l = 0; l < SIZE - 4; l++) fprintf(f_seq, "%s %d %s", l == 0 ? "seq = [" : "", generated[l], l < SIZE - 5 ? ",\0" : "]\n");
+                int l; for (l = 0; l < SIZE - 4; l++) fprintf(f_seq, "%4d", generated[l]);
+                fprintf(f_seq, "\n");
             #endif
 
             /*Generate tree associated to the sequence generated*/
