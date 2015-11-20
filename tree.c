@@ -405,9 +405,9 @@ void generate_graph() {
         verify_representation();
     #endif
 
-    #ifdef TOFILE
+    #if defined(TOFILE) && defined(GRAPH)
         for (j = 0; j < SIZE; j++)  fprintf(f_rep, "%4d", Z[j]);
-        fprintf(f_rep, "%4d", Z[j]);
+        fprintf(f_rep, "\n");
     #endif
 
     /*clear Z*/
