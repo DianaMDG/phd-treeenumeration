@@ -117,6 +117,7 @@ uint16_t Z[SIZE]    = {0, 1, 2};      /*Zeros of the representation*/
 #endif
 
 #ifdef TOFILE
+    #define DIR "data/"
     FILE *f_seq;                /*File with the list of Prüfer sequences generated TODO name*/
     #ifdef GRAPH
         FILE *f_rep;            /*File with the list of representations generated*/
@@ -149,14 +150,14 @@ void program() {
     #endif
 
     #ifdef TOFILE
-        f_seq = fopen("sequences.txt", "w");
+        f_seq = fopen(DIR "sequences.txt", "w");
         #ifdef GRAPH
-            f_rep = fopen("representations.txt", "w");
+            f_rep = fopen(DIR "representations.txt", "w");
         #endif
 
         #if defined(PRIM) || defined(CONSTANTS)
-            f_cut = fopen("cut.txt", "w"); 
-            f_pass = fopen("pass.txt", "w");
+            f_cut = fopen(DIR "cut.txt", "w"); 
+            f_pass = fopen(DIR "pass.txt", "w");
         #endif
     #endif
 

@@ -37,5 +37,7 @@ run: $(OUT)
 	@./$(OUT)
 
 tofile:
+	@rm -fr data
+	@mkdir -p data
 	@make clean run DEBUG="TOFILE"
 
