@@ -1,6 +1,6 @@
 CFLAGS   = -ansi -Wall
 LIBS     = -lm
-DEBUGDEF = NUMBERS
+DEBUGDEF = NUMBERS PRIM CONSTANTS
 OPTS     = -march=native -mtune=native -m64 -O3 -funroll-loops
 
 SRC      = src/
@@ -34,7 +34,7 @@ force: clean ${OUT}
 
 run: $(OUT)
 	@echo
-	@./$(OUT)
+	@/usr/bin/time -f "%U user - %S system - %E elapsed - %P CPU" ./$(OUT)
 
 tofile:
 	@rm -fr data
