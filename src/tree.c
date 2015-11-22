@@ -70,8 +70,8 @@
  G    : Generator polynomial for the codes*/
 
 /*Define the value of N. IF N == 15, DEFINE THE CUTTING LEVEL!!!!!*/
-#define N       7
-#define LEVEL   2
+#define N       15
+#define LEVEL   3
 
 /*Data for the NN(7, 4) codes*/
 #if N == 7
@@ -108,12 +108,12 @@ uint16_t ZAux[SIZE] = {0};            /*Auxiliar Zeros with each syndrome with H
 uint16_t Z[SIZE]    = {0, 1, 2};      /*Zeros of the representation*/
 
 #ifdef NUMBERS
-    unsigned long      int SCount      = 0;     /*Number of generated Sequences*/
+    unsigned long long int SCount      = 0;     /*Number of generated Sequences*/
     unsigned long long int CCount      = 0;     /*Number of generated Codes*/
-    unsigned           int CCutsPrim   = 0;     /*Number of representations the trees of which are NOT canonical*/
-    unsigned           int FinalsPrim  = 0;     /*Number of representations the trees of which are canonical*/
-    unsigned           int CCutsConst  = 0;     /*Number of representations which are NOT minimal regarding constants*/
-    unsigned           int FinalsConst = 0;     /*Number of representations which are minimal regarding constants*/
+    unsigned long long int CCutsPrim   = 0;     /*Number of representations the trees of which are NOT canonical*/
+    unsigned long long int FinalsPrim  = 0;     /*Number of representations the trees of which are canonical*/
+    unsigned long long int CCutsConst  = 0;     /*Number of representations which are NOT minimal regarding constants*/
+    unsigned long long int FinalsConst = 0;     /*Number of representations which are minimal regarding constants*/
 #endif
 
 #ifdef TOFILE
@@ -193,18 +193,18 @@ void program() {
     #endif
 
     #ifdef NUMBERS
-        printf("Número de sequências: %ld\n", SCount);
+        printf("Número de sequências: %lld\n", SCount);
 
         #ifdef GRAPH
             printf("Número de códigos: %lld \n", CCount);
         #endif
 
         #ifdef PRIM
-            printf("Verificação de PRIM: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsPrim, FinalsPrim);
+            printf("Verificação de PRIM: Número de cortes : %lld | Número de códigos resultantes : %lld\n", CCutsPrim, FinalsPrim);
         #endif
 
         #ifdef CONSTANTS
-            printf("Verificação das CONSTANTS: Número de cortes : %d | Número de códigos resultantes : %d\n", CCutsConst, FinalsConst);
+            printf("Verificação das CONSTANTS: Número de cortes : %lld | Número de códigos resultantes : %lld\n", CCutsConst, FinalsConst);
         #endif
     #endif
 
